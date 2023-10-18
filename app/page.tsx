@@ -19,8 +19,16 @@ export default async function Home() {
       <div>
         <div>Welcome, {userName}</div>
         <div>Enter About</div>
-        <label htmlFor="about">About:</label>
-        <input type="text" />
+        <form action="/update/about" method="post">
+          <label htmlFor="about">About:</label>
+          <input type="text" id="about" name="about" />
+          <button type="submit">Submit</button>
+        </form>
+        <form action="/update/image" method="post">
+          <label htmlFor="about">Image:</label>
+          <input type="image" id="image" name="image" />
+          {/* <button type="submit">Submit Image</button> */}
+        </form>
       </div>
     );
   } else {
