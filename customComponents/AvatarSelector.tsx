@@ -19,7 +19,7 @@ export default function Avatar() {
       if (data && data[0] && data[0].id) {
         await supabase.storage
           .from("profile-images")
-          .upload(`avatar_${data[0].id}_${Date.now()}.png`, image);
+          .update(`avatar_${data[0].id}.png`, image);
       }
 
       router.refresh();

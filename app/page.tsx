@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import type { Database } from "@/codelib/database.types";
-import Avatar from "../customComponents/page";
+import Avatar from "../customComponents/AvatarSelector";
 
 export default async function Home() {
   const cookieStore = cookies();
@@ -14,11 +14,9 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const userName = user.user_metadata.name;
-
     return (
       <div>
-        <div>Welcome, {userName}</div>
+        <div>Welcome, {user.user_metadata.name}</div>
         <div>Enter About</div>
         <form action="/update/about" method="post">
           <label htmlFor="about">About:</label>
