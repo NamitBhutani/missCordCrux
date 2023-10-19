@@ -1,7 +1,11 @@
-type Chat = {
-  with: string;
-  image: string;
-};
+interface ChatData {
+  chats: {
+    with: string;
+  };
+  images: {
+    publicUrl: string;
+  };
+}
 export default async function ChatRootLayout({
   children,
 }: {
@@ -10,7 +14,7 @@ export default async function ChatRootLayout({
   const res = await fetch("http://localhost:3000/chats/get/", {
     cache: "no-store",
   });
-  const data = res.json();
+  const data = await res.json();
   return (
     <html lang="en">
       <body>

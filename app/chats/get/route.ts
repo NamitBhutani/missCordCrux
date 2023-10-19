@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         data: id,
     } = await supabase.from('profiles').select('id').eq('email', user?.email || '').single()
 
-    const { data: chats, error } = await supabase.from('chats').select('with').eq('id', id?.id).single()
+    const { data: chats, error } = await supabase.from('chats').select('with').eq('id', id?.id || "").single()
 
     const { data: images } = supabase
         .storage
