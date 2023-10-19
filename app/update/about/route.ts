@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const { error } = await supabase
         .from('profiles')
         .update({ about: about })
-        .eq('email', user?.email)
+        .eq('email', user?.email || '')
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })

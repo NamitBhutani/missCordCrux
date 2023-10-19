@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 import type { Database } from "@/codelib/database.types";
+import Avatar from "../customComponents/page";
 
 export default async function Home() {
   const cookieStore = cookies();
@@ -24,11 +25,7 @@ export default async function Home() {
           <input type="text" id="about" name="about" />
           <button type="submit">Submit</button>
         </form>
-        <form action="/update/image" method="post">
-          <label htmlFor="about">Image:</label>
-          <input type="image" id="image" name="image" />
-          {/* <button type="submit">Submit Image</button> */}
-        </form>
+        <Avatar />
       </div>
     );
   } else {
