@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type { Database } from "@/codelib/database.types";
 import Avatar from "../customComponents/AvatarSelector";
 
@@ -20,8 +21,8 @@ export default async function Home() {
         <div>Enter About</div>
         <form action="/update/about" method="post">
           <label htmlFor="about">About:</label>
-          <input type="text" id="about" name="about" />
-          <button type="submit">Submit</button>
+          <Input type="text" id="about" name="about" />
+          <Button type="submit">Submit</Button>
         </form>
         <Avatar />
       </div>

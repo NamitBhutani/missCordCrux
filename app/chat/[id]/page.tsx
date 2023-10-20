@@ -2,6 +2,8 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import type { Database } from "@/codelib/database.types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
 type Message = {
   from: string;
@@ -67,12 +69,13 @@ export default function Chats({ params }: { params: { id: String } }) {
     <div>
       Chats:
       {JSON.stringify(chat)}
-      <input
+      <Input
         type="text"
+        placeholder="type new chat"
         value={newChat}
         onChange={(e) => setnewChat(e.target.value)}
       />
-      <button onClick={sendNewChat}>Send New Chat</button>
+      <Button onClick={sendNewChat}>Send New Chat</Button>
     </div>
   );
 }

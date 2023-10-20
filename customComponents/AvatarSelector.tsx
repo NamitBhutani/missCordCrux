@@ -2,6 +2,8 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 export default function Avatar() {
   const [image, setImage] = useState<File | null>(null);
   const router = useRouter();
@@ -29,13 +31,13 @@ export default function Avatar() {
     <div>
       <label htmlFor="image">Image:</label>
 
-      <input
+      <Input
         type="file"
         id="image"
         name="image"
         onChange={(e) => setImage(e.target.files?.[0] || null)}
       />
-      <button onClick={handleSubmit}>Submit Image</button>
+      <Button onClick={handleSubmit}>Submit Image</Button>
     </div>
   );
 }

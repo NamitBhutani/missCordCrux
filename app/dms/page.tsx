@@ -3,6 +3,8 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import type { Database } from "@/codelib/database.types";
 import { v4 as uuidv4 } from "uuid";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 type Dms = Database["public"]["Tables"]["dms"]["Row"]["with"];
 const chatUUID = uuidv4();
 export default function DMS() {
@@ -104,25 +106,27 @@ export default function DMS() {
           <h1>DMS</h1>
           {Object.entries(dms).map(([email, channel]) => (
             <li key={email}>
-              <a href={`/chat/${channel}`}>{email}</a>
+              <Button>
+                <a href={`/chat/${channel}`}>{email}</a>
+              </Button>
             </li>
           ))}
         </ul>
       ) : (
         <p>No dms found.</p>
       )}
-      <input
+      <Input
         type="text"
         value={newDMEmail}
         onChange={(e) => setNewDMEmail(e.target.value)}
       />
-      <button onClick={addNewDM}>New DM</button>
+      <Button onClick={addNewDM}>New DM</Button>
       {/* <input
         type="text"
         value={newDMEmail}
         onChange={(e) => setNewDMEmail(e.target.value)}
       /> */}
-      <button onClick={addNewGroupDM}>New Group DM</button>
+      <Button onClick={addNewGroupDM}>New Group DM</Button>
     </div>
   );
 }
