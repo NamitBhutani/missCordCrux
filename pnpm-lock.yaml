@@ -49,6 +49,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^18
     version: 18.2.13
+  '@types/uuid':
+    specifier: ^9.0.6
+    version: 9.0.6
   autoprefixer:
     specifier: ^10
     version: 10.4.16(postcss@8.4.31)
@@ -397,6 +400,10 @@ packages:
 
   /@types/scheduler@0.16.4:
     resolution: {integrity: sha512-2L9ifAGl7wmXwP4v3pN4p2FLhD0O1qsJpvKmNin5VA8+UvNVb447UDaAEV6UdrkA+m/Xs58U1RFps44x6TFsVQ==}
+    dev: true
+
+  /@types/uuid@9.0.6:
+    resolution: {integrity: sha512-BT2Krtx4xaO6iwzwMFUYvWBWkV2pr37zD68Vmp1CDV196MzczBRxuEpD6Pr395HAgebC/co7hOphs53r8V7jew==}
     dev: true
 
   /@types/websocket@1.0.7:

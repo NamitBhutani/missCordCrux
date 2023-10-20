@@ -2,10 +2,9 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import type { Database } from "@/codelib/database.types";
+import { v4 as uuidv4 } from "uuid";
 type Dms = Database["public"]["Tables"]["dms"]["Row"]["with"];
-interface DmsState {
-  emails: string[];
-}
+const chatUUID = uuidv4();
 export default function DMS() {
   const addNewDM = async () => {
     try {
@@ -16,28 +15,36 @@ export default function DMS() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       const { data: idData } = await supabase
         .from("profiles")
         .select("id")
         .eq("email", user?.email || "")
         .single();
+
       const { data: dmsData, error } = await supabase
         .from("dms")
         .select("with")
         .single();
+
       if (error) {
         console.error(error);
         return;
       }
       console.log(dmsData);
+
       const emails = JSON.parse(JSON.stringify(dmsData.with));
-      const updatedEmails = [...emails.emails, newDMEmail];
+      const updatedEmails = { ...emails, [newDMEmail]: chatUUID };
 
       console.log(JSON.stringify(updatedEmails));
 
+      const { error: chatChannelError } = await supabase
+        .from("chats")
+        .insert({ channel: chatUUID });
+
       const { error: updateError } = await supabase
         .from("dms")
-        .update({ with: { emails: updatedEmails } })
+        .update({ with: updatedEmails })
         .eq("id", idData?.id || "");
 
       if (updateError) {
@@ -94,21 +101,27 @@ export default function DMS() {
     <div>
       {dms ? (
         <ul>
-          {dms.emails.map((email: string, index: number) => (
-            <li key={index}>
-              <a href={`/chat/1`}>{email}</a>
+          <h1>DMS</h1>
+          {Object.entries(dms).map(([email, channel]) => (
+            <li key={email}>
+              <a href={`/chat/${channel}`}>{email}</a>
             </li>
           ))}
         </ul>
       ) : (
-        <p>No emails found.</p>
+        <p>No dms found.</p>
       )}
-      <button onClick={addNewDM}>New DM</button>
       <input
         type="text"
         value={newDMEmail}
         onChange={(e) => setNewDMEmail(e.target.value)}
       />
+      <button onClick={addNewDM}>New DM</button>
+      {/* <input
+        type="text"
+        value={newDMEmail}
+        onChange={(e) => setNewDMEmail(e.target.value)}
+      /> */}
       <button onClick={addNewGroupDM}>New Group DM</button>
     </div>
   );

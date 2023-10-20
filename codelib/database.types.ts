@@ -9,21 +9,33 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      chats: {
+        Row: {
+          channel: string
+          chat: string | null
+        }
+        Insert: {
+          channel?: string
+          chat?: string | null
+        }
+        Update: {
+          channel?: string
+          chat?: string | null
+        }
+        Relationships: []
+      }
       dms: {
         Row: {
-          channels: Json[] | null
           chats: Json[] | null
           id: string
           with: Json | null
         }
         Insert: {
-          channels?: Json[] | null
           chats?: Json[] | null
           id: string
           with?: Json | null
         }
         Update: {
-          channels?: Json[] | null
           chats?: Json[] | null
           id?: string
           with?: Json | null
