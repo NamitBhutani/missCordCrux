@@ -9,28 +9,28 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      chats: {
+      dms: {
         Row: {
           channels: Json[] | null
           chats: Json[] | null
           id: string
-          with: Json[] | null
+          with: Json | null
         }
         Insert: {
           channels?: Json[] | null
           chats?: Json[] | null
           id: string
-          with?: Json[] | null
+          with?: Json | null
         }
         Update: {
           channels?: Json[] | null
           chats?: Json[] | null
           id?: string
-          with?: Json[] | null
+          with?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "chats_id_fkey"
+            foreignKeyName: "dms_id_fkey"
             columns: ["id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
