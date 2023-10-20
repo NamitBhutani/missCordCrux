@@ -12,15 +12,15 @@ export interface Database {
       chats: {
         Row: {
           channel: string
-          chat: string | null
+          chat: Json[] | null
         }
         Insert: {
           channel?: string
-          chat?: string | null
+          chat?: Json[] | null
         }
         Update: {
           channel?: string
-          chat?: string | null
+          chat?: Json[] | null
         }
         Relationships: []
       }
