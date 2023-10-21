@@ -66,16 +66,36 @@ export default function Chats({ params }: { params: { id: String } }) {
     };
   }, [supabase, setChat]);
   return (
-    <div>
-      Chats:
-      {JSON.stringify(chat)}
-      <Input
-        type="text"
-        placeholder="type new chat"
-        value={newChat}
-        onChange={(e) => setnewChat(e.target.value)}
-      />
-      <Button onClick={sendNewChat}>Send New Chat</Button>
-    </div>
+    <>
+      <div className="p-4 border rounded shadow-md">
+        <h2 className="text-2xl font-semibold mb-4">Chats:</h2>
+        <div>
+          {(chat as unknown as Message[])?.map((message, index) => (
+            <div key={index} className="mb-2">
+              <p className="text-gray-800">{message?.chat}</p>
+              <p className="text-gray-600">{`From: ${message?.from}, Time: ${message?.time}`}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 border rounded shadow-md mt-4">
+        <div className="flex items-center">
+          <Input
+            type="text"
+            placeholder="Type a new chat"
+            value={newChat}
+            onChange={(e) => setnewChat(e.target.value)}
+            className="mr-2 px-4 py-2 rounded border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
+          />
+          <Button
+            onClick={sendNewChat}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Send New Chat
+          </Button>
+        </div>
+      </div>
+    </>
   );
 }
