@@ -26,23 +26,57 @@ export interface Database {
       }
       dms: {
         Row: {
-          chats: Json[] | null
           id: string
           with: Json | null
         }
         Insert: {
-          chats?: Json[] | null
           id: string
           with?: Json | null
         }
         Update: {
-          chats?: Json[] | null
           id?: string
           with?: Json | null
         }
         Relationships: [
           {
             foreignKeyName: "dms_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      group_chats: {
+        Row: {
+          channel: string
+          chat: Json[] | null
+        }
+        Insert: {
+          channel?: string
+          chat?: Json[] | null
+        }
+        Update: {
+          channel?: string
+          chat?: Json[] | null
+        }
+        Relationships: []
+      }
+      group_dms: {
+        Row: {
+          id: string
+          with_group: Json
+        }
+        Insert: {
+          id: string
+          with_group: Json
+        }
+        Update: {
+          id?: string
+          with_group?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_dms_id_fkey"
             columns: ["id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
