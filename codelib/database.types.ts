@@ -15,73 +15,61 @@ export interface Database {
           chat: Json[] | null
         }
         Insert: {
-          channel?: string
+          channel: string
           chat?: Json[] | null
         }
         Update: {
           channel?: string
           chat?: Json[] | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chats_channel_fkey"
+            columns: ["channel"]
+            referencedRelation: "dms"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      dm_members: {
+        Row: {
+          id: string | null
+          member: string
+          pkey: string
+        }
+        Insert: {
+          id?: string | null
+          member: string
+          pkey?: string
+        }
+        Update: {
+          id?: string | null
+          member?: string
+          pkey?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_members_id_fkey"
+            columns: ["id"]
+            referencedRelation: "dms"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       dms: {
         Row: {
+          admin: string
           id: string
-          with: Json | null
         }
         Insert: {
+          admin: string
           id: string
-          with?: Json | null
         }
         Update: {
+          admin?: string
           id?: string
-          with?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dms_id_fkey"
-            columns: ["id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      group_chats: {
-        Row: {
-          channel: string
-          chat: Json[] | null
-        }
-        Insert: {
-          channel?: string
-          chat?: Json[] | null
-        }
-        Update: {
-          channel?: string
-          chat?: Json[] | null
         }
         Relationships: []
-      }
-      group_dms: {
-        Row: {
-          id: string
-          with_group: Json
-        }
-        Insert: {
-          id: string
-          with_group: Json
-        }
-        Update: {
-          id?: string
-          with_group?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "group_dms_id_fkey"
-            columns: ["id"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
       }
       profiles: {
         Row: {

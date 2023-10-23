@@ -58,7 +58,7 @@ export default function RealtimeGroupChats({
   }, [supabase, setChat]);
   return (
     <>
-      <div className="p-4 border rounded shadow-md">
+      <div>
         <h2 className="text-2xl font-semibold mb-4">Chats:</h2>
         <div>
           {(chat as unknown as Message[])?.map((message, index) => (

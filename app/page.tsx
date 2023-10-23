@@ -5,6 +5,7 @@ import { ModeToggle } from "@/customComponents/ModeToggle";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import Login from "./login/page";
+import UserSelector from "@/customComponents/UserSelector";
 export default async function Home() {
   const cookieStore = cookies();
   const supabase = createServerComponentClient<Database>({
