@@ -33,4 +33,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-sfuServer/node_modules
+webRTC-sfuServer/node_modules
