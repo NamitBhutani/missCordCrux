@@ -13,7 +13,12 @@ const groupChatUUID = uuidv4();
 export default function RealtimeDms({
   props,
 }: {
-  props: { id: string; initialDms: Dms; initialGroupDms: GroupDms };
+  props: {
+    id: string;
+    initialDms: Dms;
+    initialGroupDms: GroupDms;
+    children: React.ReactNode;
+  };
 }) {
   const supabase = createClientComponentClient<Database>();
   const addNewDM = async () => {
@@ -32,12 +37,12 @@ export default function RealtimeDms({
         console.error(error);
         return;
       }
-      console.log(dmsData);
+      //console.log(dmsData);
 
       const emails = JSON.parse(JSON.stringify(dmsData.with));
       const updatedEmails = { ...emails, [newDMEmail]: chatUUID };
 
-      console.log(JSON.stringify(updatedEmails));
+      //console.log(JSON.stringify(updatedEmails));
 
       const { error: chatChannelError } = await supabase
         .from("chats")
@@ -70,7 +75,7 @@ export default function RealtimeDms({
 
     const emails = JSON.parse(JSON.stringify(groupDmsData.with_group));
     const updatedEmails = { ...emails, [groupChatUUID]: newGroupDMEmails };
-    console.log("ue" + JSON.stringify(updatedEmails));
+    // console.log("ue" + JSON.stringify(updatedEmails));
     const { error: chatChannelError } = await supabase
       .from("group_chats")
       .insert({ channel: groupChatUUID });
@@ -82,7 +87,7 @@ export default function RealtimeDms({
   };
 
   const [dms, setDms] = useState<Dms | null>(props.initialDms);
-  const [groupDms, setgroupDms] = useState<GroupDms | null>(
+  const [groupDms, setGroupDms] = useState<GroupDms | null>(
     props.initialGroupDms
   );
   const [newDMEmail, setNewDMEmail] = useState<string>("");
@@ -91,13 +96,14 @@ export default function RealtimeDms({
 
   useEffect(() => {
     const channel = supabase
-      .channel("*")
+      .channel("dms")
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "dms" },
         (payload) => {
           setDms((dms) => {
             if (payload.new) {
+              console.log("ter" + payload.new);
               return payload.new.with;
             }
             return dms;
@@ -109,17 +115,16 @@ export default function RealtimeDms({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, setDms]);
+  }, [supabase]);
 
-  //realtime load as a new dm is added
   useEffect(() => {
     const channel = supabase
-      .channel("*")
+      .channel("group-dms")
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "group_dms" },
         (payload) => {
-          setDms((dms) => {
+          setGroupDms((dms) => {
             if (payload.new) {
               return payload.new.with_group;
             }
@@ -132,41 +137,44 @@ export default function RealtimeDms({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, setgroupDms]);
+  }, [supabase]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-y-auto">
-        {dms || groupDms ? (
-          <ul className="mb-4">
-            <h1 className="text-2xl mb-4">DMS</h1>
+    <>
+      <div className="flex flex-row h-screen">
+        {/* Sidebar for DMs */}
+        <div className="w-1/4 p-4 border-r">
+          <div className="mb-4">
+            <h1 className="text-2xl mb-2">DMS</h1>
             {dms &&
               Object.entries(dms).map(([email, channel]) => (
-                <li key={channel} className="mb-2">
-                  <Button className="bg-blue-500 hover-bg-blue-600 text-white px-4 py-2 rounded">
+                <div key={channel} className="mb-2">
+                  <Button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
                     <Link href={`/chat/${channel}`} className="text-white">
                       {email}
                     </Link>
                   </Button>
-                </li>
+                </div>
               ))}
-            <h1 className="text-2xl mb-4">Group DMS</h1>
+          </div>
+
+          <div className="mb-4">
+            <h1 className="text-2xl mb-2">Group DMS</h1>
             {groupDms &&
               Object.entries(groupDms).map(([channel, emails]) => (
-                <li key={channel} className="mb-2">
+                <div key={channel} className="mb-2">
                   <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
                     <Link href={`/groupchat/${channel}`} className="text-white">
                       {emails.join(", ")}
                     </Link>
                   </Button>
-                </li>
+                </div>
               ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">
-            Enter an email ID to make a new DM or group DM!
-          </p>
-        )}
+          </div>
+        </div>
+
+        {/* Main content area for chat messages */}
+        <div className="w-3/4 p-4">{props.children}</div>
       </div>
 
       <div className="flex items-center justify-between p-4">
@@ -203,6 +211,6 @@ export default function RealtimeDms({
           New Group DM
         </Button>
       </div>
-    </div>
+    </>
   );
 }
