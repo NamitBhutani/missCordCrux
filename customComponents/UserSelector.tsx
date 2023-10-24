@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 type OnSelectionChangeType = (selectedUsers: string[]) => void;
 interface UserSelectorProps {
   onSelectionChange: OnSelectionChangeType;
@@ -45,17 +47,16 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
     <div>
       {profileData?.map((user) => (
         <div key={user.id}>
-          <input
-            type="checkbox"
+          <Checkbox
             checked={selectedUsers.includes(user.email)}
-            onChange={() => handleUserSelection(user.email)}
+            onCheckedChange={() => handleUserSelection(user.email)}
           />
           {user.raw_user_meta_data?.name}
           <br />
           Email: {user.email}
         </div>
       ))}
-      <button onClick={() => onSelectionChange(selectedUsers)}>Confirm!</button>
+      <Button onClick={() => onSelectionChange(selectedUsers)}>Confirm!</Button>
     </div>
   );
 }

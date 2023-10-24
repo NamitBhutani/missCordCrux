@@ -1,12 +1,10 @@
 "use client";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 export default function Avatar() {
   const [image, setImage] = useState<File | null>(null);
-  const router = useRouter();
   const supabase = createClientComponentClient();
   const handleSubmit = async () => {
     if (image) {
@@ -23,8 +21,6 @@ export default function Avatar() {
           .from("profile-images")
           .update(`avatar_${data[0].id}.png`, image);
       }
-
-      router.refresh();
     }
   };
   return (

@@ -2,6 +2,7 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,15 +37,15 @@ export default function RealtimeChats({
     setNewMembersID(selectedUsers);
   };
   const sendNewChat = async () => {
-    const updatedChats = [
-      ...(chat as unknown as Message[]),
-      { from: params.username, chat: newChat, time: Date.now() },
-    ];
-
-    const { error } = await supabase
-      .from("chats")
-      .update({ chat: updatedChats as Chats })
-      .eq("channel", params.id);
+    await fetch("/add/chat", {
+      method: "post",
+      body: JSON.stringify({
+        chat: chat,
+        username: params.username,
+        newChat: newChat,
+        id: params.id,
+      }),
+    });
   };
   const addNewMembers = async () => {
     console.log(newMembersID);
@@ -79,7 +80,8 @@ export default function RealtimeChats({
         (payload) => {
           setChat((chats) => {
             if (payload.new) {
-              return payload.new.chat;
+              // console.log(payload.new.chat);
+              return [...payload.new.chat];
             }
             return chats;
           });
@@ -93,15 +95,15 @@ export default function RealtimeChats({
   }, [supabase, setChat]);
   return (
     <>
-      <div className="flex">
-        <div className="w-2/3 pr-4">
+      <div>
+        <div>
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Chats:</h2>
+            <h2>Chats:</h2>
             <div>
               {(chat as unknown as Message[])?.map((message, index) => (
                 <div key={index} className="mb-2">
-                  <p className="text-white">{message?.chat}</p>
-                  <p className="text-white" suppressHydrationWarning>
+                  <p>{message?.chat}</p>
+                  <p suppressHydrationWarning>
                     {message.from === params.username
                       ? `From: You, Time: ${formatDate(message.time)} `
                       : `From: ${message.from}, Time: ${formatDate(
@@ -112,21 +114,15 @@ export default function RealtimeChats({
               ))}
             </div>
           </div>
-          <div className="p-4 border rounded shadow-md mt-4">
-            <div className="flex items-center">
-              <input
+          <div>
+            <div>
+              <Input
                 type="text"
                 placeholder="Type a new chat"
                 value={newChat}
                 onChange={(e) => setnewChat(e.target.value)}
-                className="mr-2 px-4 py-2 rounded border-2 border-gray-300 focus:border-blue-500 focus:outline-none"
               />
-              <button
-                onClick={sendNewChat}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Send New Chat
-              </button>
+              <Button onClick={sendNewChat}>Send New Chat</Button>
               {isUploadSelectorVisible && (
                 <Input
                   type="file"
@@ -135,24 +131,23 @@ export default function RealtimeChats({
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
                 />
               )}
-              <button
+              <Button
                 onClick={() => {
                   setIsUploadSelectorVisible(!isUploadSelectorVisible),
                     uploadNewFile();
                 }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
               >
                 Upload File
-              </button>
+              </Button>
             </div>
           </div>
         </div>
-        <div className="w-1/3">
-          <h2 className="text-2xl font-semibold mb-4">Members:</h2>
+        <div>
+          <h2>Members:</h2>
           <ul>
             {params.initialMembers?.map((member, index) => (
-              <li key={index} className="text-white">
-                {member.member}
+              <li key={index}>
+                <Badge variant="secondary">{member.member}</Badge>
               </li>
             ))}
           </ul>
@@ -161,18 +156,10 @@ export default function RealtimeChats({
               {isUserSelectorOpen && (
                 <UserSelector onSelectionChange={handleSelectionChange} />
               )}
-              <button
-                onClick={() => setIsUserSelectorOpen(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-              >
+              <Button onClick={() => setIsUserSelectorOpen(true)}>
                 Select New Members
-              </button>
-              <button
-                onClick={addNewMembers}
-                className="bg-blue-500 hover-bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Add
-              </button>
+              </Button>
+              <Button onClick={addNewMembers}>Add</Button>
             </div>
           )}
         </div>

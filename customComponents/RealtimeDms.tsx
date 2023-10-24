@@ -3,11 +3,13 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import type { Database } from "@/codelib/database.types";
 import { v5 as uuidv5 } from "uuid";
+import { badgeVariants } from "@/components/ui/badge";
+import redis from "@/lib/redis";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import UserSelector from "./UserSelector";
-type Dms = Database["public"]["Tables"]["dms"]["Row"]["id"];
+
 type RearrangedItem = {
   id: string;
 };
@@ -15,63 +17,20 @@ export default function RealtimeDms({
   props,
 }: {
   props: {
-    id: string;
     email: string;
     initialDms: RearrangedItem[];
     children: React.ReactNode;
   };
 }) {
   const supabase = createClientComponentClient<Database>();
-  function generateUUIDFromValues(values: string[]) {
-    const uniqueString = values.join("");
-    const namespace = "1b671a64-40d5-491e-99b0-da01ff1f3341";
-    const generatedUUID = uuidv5(uniqueString, namespace);
-    return generatedUUID;
-  }
   const addNewDM = async () => {
-    try {
-      if (!newMembersID) {
-        return;
-      }
-      const newDMId = generateUUIDFromValues(newMembersID);
-      const { data: currentDMIds, error } = await supabase
-        .from("dms")
-        .select("id");
-      if (error) {
-        console.log(error);
-      } else console.log(currentDMIds);
-
-      if (currentDMIds?.some((item) => item.id === newDMId)) {
-        console.log("DM already exists");
-        return;
-      } else {
-        const { error: sw } = await supabase.from("dms").insert({
-          id: newDMId,
-          admin: props.email,
-        });
-        if (sw) {
-          console.log(sw);
-        }
-        const { error: u } = await supabase.from("dm_members").insert({
-          id: newDMId,
-          member: props.email,
-        });
-        newMembersID.forEach(async (member) => {
-          const { error: p } = await supabase.from("dm_members").insert({
-            id: newDMId,
-            member: member,
-          });
-        });
-        const { error: chatInsertError } = await supabase.from("chats").insert({
-          channel: newDMId,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    await fetch("/add/dm", {
+      method: "post",
+      body: JSON.stringify({ newMembersID: newMembersID, email: props.email }),
+    });
   };
 
-  const [dms, setDms] = useState<RearrangedItem[] | null>(props.initialDms);
+  const [dms, setDms] = useState<RearrangedItem[]>(props.initialDms);
   const [newMembersID, setNewMembersID] = useState<string[]>([]);
   const [isUserSelectorOpen, setIsUserSelectorOpen] = useState<boolean>(false);
 
@@ -85,11 +44,15 @@ export default function RealtimeDms({
       .channel("dms")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "dms" },
+        { event: "INSERT", schema: "public", table: "dm_members" },
         (payload) => {
           setDms((dms) => {
             if (payload.new) {
-              return payload.new.id;
+              // return [...dms, payload.new.id];
+              if (payload.new.member === props.email) {
+                // If the "member" column matches the user's email, add the ID to the state.
+                return [...dms, { id: payload.new.id }];
+              }
             }
             return dms;
           });
@@ -103,42 +66,44 @@ export default function RealtimeDms({
   }, [supabase]);
 
   return (
-    <>
-      <div className="flex flex-row h-screen">
-        {/* Sidebar for DMs */}
-        <div className="w-1/4 p-4 border-r">
-          <div className="mb-4">
-            <h1 className="text-2xl mb-2">DMS</h1>
-            {dms &&
-              dms.map((dm) => (
-                <div key={dm.id}>
-                  <Link href={`/dms/chat/${dm.id}`}>Open DM</Link>
-                </div>
-              ))}
-          </div>
-          {isUserSelectorOpen && (
-            <UserSelector onSelectionChange={handleSelectionChange} />
-          )}
+    <div>
+      {/* Sidebar for DMs */}
+      <div>
+        <h1>DMS</h1>
+        <div>
+          {dms &&
+            dms.map((dm) => (
+              <div key={dm.id}>
+                <Link href={`/dms/chat/${dm.id}`} className={badgeVariants()}>
+                  DM name goes here
+                </Link>
+              </div>
+            ))}
         </div>
 
-        {/* Main content area for chat messages */}
-        <div className="w-3/4 p-4">{props.children}</div>
+        {isUserSelectorOpen && (
+          <UserSelector onSelectionChange={handleSelectionChange} />
+        )}
       </div>
 
-      <div className="flex items-center justify-between p-4">
+      {/* Main content area for chat messages */}
+      <div>{props.children}</div>
+
+      {/* Buttons on the right */}
+      <div>
         <Button
           onClick={() => setIsUserSelectorOpen(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4"
         >
-          Select Members for the DM!
+          Select Members for DM
         </Button>
         <Button
           onClick={addNewDM}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
-          Start a New DM!
+          Start a New DM
         </Button>
       </div>
-    </>
+    </div>
   );
 }
