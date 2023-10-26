@@ -1,15 +1,13 @@
 "use client";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import type { Database } from "@/codelib/database.types";
-import { v5 as uuidv5 } from "uuid";
 import { badgeVariants } from "@/components/ui/badge";
-import redis from "@/lib/redis";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import UserSelector from "./UserSelector";
-
+const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
+import toast from "react-hot-toast";
 type RearrangedItem = {
   id: string;
 };
@@ -24,10 +22,17 @@ export default function RealtimeDms({
 }) {
   const supabase = createClientComponentClient<Database>();
   const addNewDM = async () => {
-    await fetch("/add/dm", {
+    const res = await fetch("/add/dm", {
       method: "post",
       body: JSON.stringify({ newMembersID: newMembersID, email: props.email }),
     });
+    const data = await res.json();
+    if (data.status === 200) {
+      toast.success(data.message);
+    } else {
+      toast.error(data.message);
+    }
+    setNewMembersID([]);
   };
 
   const [dms, setDms] = useState<RearrangedItem[]>(props.initialDms);
@@ -92,7 +97,7 @@ export default function RealtimeDms({
       {/* Buttons on the right */}
       <div>
         <Button
-          onClick={() => setIsUserSelectorOpen(true)}
+          onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4"
         >
           Select Members for DM

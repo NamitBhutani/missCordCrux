@@ -14,10 +14,16 @@ export async function POST(request: Request) {
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     const { chat, username, newChat, id } = await request.json();
     const keyChats = `chats:${id}`;
-    if (newChat.length === 0) { return NextResponse.json({ message: 'Empty Chat!' }, { status: 400 }) }
+    const {
+        data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+        NextResponse.redirect("/unauthenticated");
+    }
+    if (newChat.length === 0) { return NextResponse.json({ message: 'Empty Chat!', status: 400 }, { status: 400 }) }
     const updatedChats = [
         ...(chat ? (chat as unknown as Message[]) : []),
-        { from: username, chat: newChat, time: Date.now() },
+        { chat: newChat, from: username, time: Date.now() },
     ];
     const chatStrings: string[] = updatedChats.map((chat) =>
         JSON.stringify(chat)
@@ -28,13 +34,23 @@ export async function POST(request: Request) {
         .eq("channel", id);
     const cachedChats = await redis.lrange(keyChats, 0, -1);
 
-    if (cachedChats === chatStrings) { await redis.rpush(keyChats, newChat) }
-    else { await redis.rpush(keyChats, ...chatStrings) }
+
+    if (cachedChats !== chatStrings) {
+
+        await redis.ltrim(keyChats, -1, -1)
+
+        await redis.rpush(keyChats, ...chatStrings)
+
+        await redis.expire(keyChats, 60)
+    } else {
+        await redis.rpush(keyChats, newChat)
+        await redis.expire(keyChats, 60)
+    }
 
     if (error) {
-        return NextResponse.json({ message: 'Error sending chat!' }, { status: 400 })
+        return NextResponse.json({ message: 'Error sending chat!', status: 400 }, { status: 400 })
     }
     else {
-        return NextResponse.json({ message: 'Chat sent!' }, { status: 200 })
+        return NextResponse.json({ message: 'Chat sent!', status: 200 }, { status: 200 })
     }
 }

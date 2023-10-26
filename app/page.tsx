@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
-import { ModeToggle } from "@/customComponents/ModeToggle";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import Login from "./login/page";
@@ -20,7 +19,7 @@ export default async function Home() {
       <div className="flex items-center justify-center h-screen">
         <div className="p-4 rounded shadow-md">
           <div className="text-center">Welcome, {user?.user_metadata.name}</div>
-          <ModeToggle />
+
           <Link
             className={buttonVariants({ variant: "outline" })}
             href="/profile"
@@ -33,7 +32,6 @@ export default async function Home() {
   } else {
     return (
       <div>
-        <ModeToggle />
         <Login />
       </div>
     );

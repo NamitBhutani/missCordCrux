@@ -15,8 +15,10 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
 
     if (cachedDMs.length > 0) {
       // Data found in cache, parse and return it
-      console.log(cachedDMs + "from cached dms");
-      return cachedDMs;
+      const convertedDMs = cachedDMs.map((dm) => {
+        return { id: JSON.parse(dm) };
+      });
+      return convertedDMs;
     } else {
       // Data not found in cache, fetch it from the database
       const { data, error } = await supabase

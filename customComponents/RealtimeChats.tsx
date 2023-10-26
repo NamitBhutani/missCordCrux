@@ -3,11 +3,13 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import dynamic from "next/dynamic";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import UserSelector from "./UserSelector";
+const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
 type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
+import toast from "react-hot-toast";
 type Message = {
   from: string;
   chat: string;
@@ -32,12 +34,13 @@ export default function RealtimeChats({
   };
 }) {
   const supabase = createClientComponentClient<Database>();
+
   const handleSelectionChange = (selectedUsers: string[]) => {
     setIsUserSelectorOpen(false);
     setNewMembersID(selectedUsers);
   };
   const sendNewChat = async () => {
-    await fetch("/add/chat", {
+    const res = await fetch("/add/chat", {
       method: "post",
       body: JSON.stringify({
         chat: chat,
@@ -46,9 +49,33 @@ export default function RealtimeChats({
         id: params.id,
       }),
     });
+    const data = await res.json();
+    if (data.status === 200) {
+      toast.success(data.message);
+    } else {
+      toast.error(data.message);
+    }
+    setnewChat("");
   };
-  const addNewMembers = async () => {
-    console.log(newMembersID);
+
+  const kickMembers = async (member: string) => {
+    const res = await fetch("/kick", {
+      method: "post",
+      body: JSON.stringify({
+        member: member,
+        isAdmin: params.isAdmin,
+        id: params.id,
+      }),
+    });
+    const data = await res.json();
+    if (data.status === 200) {
+      toast.success(data.message);
+      window.location.reload();
+    } else {
+      toast.error(data.message);
+    }
+
+    // console.log(newMembersID);
   };
   const uploadNewFile = async () => {
     if (!image) {
@@ -69,6 +96,9 @@ export default function RealtimeChats({
   const [image, setImage] = useState<File | null>(null);
   const [newChat, setnewChat] = useState<string>("");
   const [chat, setChat] = useState<Chats | null>(params.initialChats);
+  // const [members, setMembers] = useState<MembersLoadData>(
+  //   params.initialMembers
+  // );
   const [newMembersID, setNewMembersID] = useState<string[]>([]);
   const [isUserSelectorOpen, setIsUserSelectorOpen] = useState<boolean>(false);
   useEffect(() => {
@@ -93,6 +123,29 @@ export default function RealtimeChats({
       supabase.removeChannel(channel);
     };
   }, [supabase, setChat]);
+  // useEffect(() => {
+  //   const channel = supabase
+  //     .channel("members")
+  //     .on(
+  //       "postgres_changes",
+  //       { event: "DELETE", schema: "public", table: "dm_members" },
+  //       (payload) => {
+  //         setMembers((members) => {
+  //           if (payload) {
+  //             console.log(payload);
+  //             //   return [...payload.new.chat];
+  //             window.
+  //           }
+  //           return members;
+  //         });
+  //       }
+  //     )
+  //     .subscribe();
+
+  //   return () => {
+  //     supabase.removeChannel(channel);
+  //   };
+  // }, [supabase, setChat]);
   return (
     <>
       <div>
@@ -122,7 +175,13 @@ export default function RealtimeChats({
                 value={newChat}
                 onChange={(e) => setnewChat(e.target.value)}
               />
-              <Button onClick={sendNewChat}>Send New Chat</Button>
+              <Button
+                onClick={() => {
+                  sendNewChat();
+                }}
+              >
+                Send New Chat
+              </Button>
               {isUploadSelectorVisible && (
                 <Input
                   type="file"
@@ -147,19 +206,30 @@ export default function RealtimeChats({
           <ul>
             {params.initialMembers?.map((member, index) => (
               <li key={index}>
-                <Badge variant="secondary">{member.member}</Badge>
+                <div>
+                  <Badge variant="secondary">{member.member}</Badge>
+                  <Button
+                    onClick={() => {
+                      kickMembers(member.member);
+                    }}
+                  >
+                    kik
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
           {params.isAdmin && (
             <div>
-              {isUserSelectorOpen && (
-                <UserSelector onSelectionChange={handleSelectionChange} />
-              )}
-              <Button onClick={() => setIsUserSelectorOpen(true)}>
-                Select New Members
+              <Button
+                onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
+              >
+                Show invite link
               </Button>
-              <Button onClick={addNewMembers}>Add</Button>
+              {isUserSelectorOpen && (
+                <p>{`/dms/join/${params.id}`}</p>
+                // <UserSelector onSelectionChange={handleSelectionChange} />
+              )}
             </div>
           )}
         </div>

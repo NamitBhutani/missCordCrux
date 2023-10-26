@@ -10,6 +10,7 @@ interface UserSelectorProps {
 }
 type raw_user_meta_data =
   Database["public"]["Tables"]["profiles"]["Row"]["raw_user_meta_data"];
+type custom_raw_user_meta_data = { name: string };
 type ProfileData =
   | {
       id: string;
@@ -25,9 +26,13 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         const { data, error } = await supabase
           .from("profiles")
-          .select("id,email,raw_user_meta_data");
+          .select("id,email,raw_user_meta_data")
+          .neq("email", user?.email);
         setProfileData(data);
       } catch (error) {
         // setError(error.message);
@@ -51,7 +56,7 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
             checked={selectedUsers.includes(user.email)}
             onCheckedChange={() => handleUserSelection(user.email)}
           />
-          {user.raw_user_meta_data?.name}
+          {(user.raw_user_meta_data as custom_raw_user_meta_data)?.name}
           <br />
           Email: {user.email}
         </div>

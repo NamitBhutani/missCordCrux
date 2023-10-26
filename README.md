@@ -1,3 +1,4 @@
 TODO:
-1.Better form handling, clearing inputs on submit, not letting empty fields, better error handling
-2.Block routes for unauthenticated users
+3.Lazy Loading
+4.CSS layouts
+5.BUG IN video call - group video caller doesnt get the streams of other peers, rest all peers get

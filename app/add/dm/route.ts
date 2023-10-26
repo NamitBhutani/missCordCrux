@@ -14,22 +14,28 @@ export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   const { newMembersID, email } = await request.json();
   try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      NextResponse.redirect("/unauthenticated");
+    }
     if (newMembersID.length === 0) {
-      return NextResponse.json({ message: 'Empty fields detected!' }, { status: 400 })
+      return NextResponse.json({ message: 'Empty fields detected!', status: 400 }, { status: 400 })
     }
     const newDMId = generateUUIDFromValues(newMembersID);
 
     // Check if DM ID exists in the cache
     const dmExists = await redis.get(`dms:${newDMId}`);
     if (dmExists === "exists") {
-      return NextResponse.json({ message: 'DM already exists!' }, { status: 400 })
+      return NextResponse.json({ message: 'DM already exists!', status: 400 }, { status: 400 })
     }
     const { error: newDMInsertError } = await supabase.from("dms").insert({
       id: newDMId,
       admin: email,
     });
     if (newDMInsertError) {
-      return NextResponse.json({ message: 'Error adding DM!' }, { status: 400 })
+      return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
     }
 
     const { error: adminMemberInsertError } = await supabase
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
 
 
     await redis.rpush(memberDmsKey, newDMId);
-    console.log("memberDmsKey set for logged in", memberDmsKey);
+    // console.log("memberDmsKey set for logged in", memberDmsKey);
     await redis.expire(memberDmsKey, 60);
 
 
@@ -62,7 +68,7 @@ export async function POST(request: Request) {
 
     // Cache the new DM ID
     await redis.set(`dms:${newDMId}`, "exists");
-    return NextResponse.json({ message: 'success' }, { status: 200 })
+    return NextResponse.json({ message: 'success', status: 200 }, { status: 200 })
   } catch (error) {
     console.error(error);
   }
