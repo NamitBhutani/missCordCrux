@@ -7,7 +7,10 @@ type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
 type Message = {
     from: string;
     chat: string;
-    time: Date;
+};
+type ChatLoadData = {
+    chat: Message;
+    timestamp: string;
 };
 export async function POST(request: Request) {
     const cookieStore = cookies();
@@ -22,15 +25,15 @@ export async function POST(request: Request) {
     }
     if (newChat.length === 0) { return NextResponse.json({ message: 'Empty Chat!', status: 400 }, { status: 400 }) }
     const updatedChats = [
-        ...(chat ? (chat as unknown as Message[]) : []),
-        { chat: newChat, from: username, time: Date.now() },
+        ...(chat ? (chat as unknown as ChatLoadData[]) : []),
+        { chat: { chat: newChat, from: username }, timestamp: new Date().toISOString() },
     ];
     const chatStrings: string[] = updatedChats.map((chat) =>
         JSON.stringify(chat)
     );
     const { error } = await supabase
         .from("chats")
-        .update({ chat: updatedChats as Chats })
+        .insert({ chat: { chat: newChat, from: username }, channel: id })
         .eq("channel", id);
     const cachedChats = await redis.lrange(keyChats, 0, -1);
 
@@ -48,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     if (error) {
-        return NextResponse.json({ message: 'Error sending chat!', status: 400 }, { status: 400 })
+        return NextResponse.json({ message: error, status: 400 }, { status: 400 })
     }
     else {
         return NextResponse.json({ message: 'Chat sent!', status: 200 }, { status: 200 })

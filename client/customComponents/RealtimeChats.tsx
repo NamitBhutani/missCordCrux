@@ -7,20 +7,32 @@ import dynamic from "next/dynamic";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
-type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
 import toast from "react-hot-toast";
 type Message = {
   from: string;
   chat: string;
-  time: Date;
 };
+type ChatLoadData = {
+  chat: Message;
+  timestamp: string;
+};
+type DateTimeFormatOptions = {};
 type MembersLoadData = Array<{ member: string }> | null;
 
-const formatDate = (timestamp: Date): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleString();
-};
+function formatTimestamp(isoTimestamp: string) {
+  const date = new Date(isoTimestamp);
+  const options: DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  };
+  return date.toLocaleDateString("en-US", options);
+}
 
 export default function RealtimeChats({
   params,
@@ -28,7 +40,7 @@ export default function RealtimeChats({
   params: {
     id: String;
     username: string;
-    initialChats: Chats;
+    initialChats: ChatLoadData[];
     initialMembers: MembersLoadData;
     isAdmin: boolean;
   };
@@ -95,7 +107,7 @@ export default function RealtimeChats({
     useState<boolean>(false);
   const [image, setImage] = useState<File | null>(null);
   const [newChat, setnewChat] = useState<string>("");
-  const [chat, setChat] = useState<Chats | null>(params.initialChats);
+  const [chat, setChat] = useState<ChatLoadData[] | null>(params.initialChats);
   // const [members, setMembers] = useState<MembersLoadData>(
   //   params.initialMembers
   // );
@@ -106,14 +118,17 @@ export default function RealtimeChats({
       .channel("*")
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "chats" },
+        { event: "INSERT", schema: "public", table: "chats" },
         (payload) => {
-          setChat((chats) => {
+          setChat((chat) => {
             if (payload.new) {
-              // console.log(payload.new.chat);
-              return [...payload.new.chat];
+              console.log(payload.new);
+              return [
+                ...(chat as ChatLoadData[]),
+                { chat: payload.new.chat, timestamp: payload.new.timestamp },
+              ];
             }
-            return chats;
+            return chat;
           });
         }
       )
@@ -153,14 +168,16 @@ export default function RealtimeChats({
           <div>
             <h2>Chats:</h2>
             <div>
-              {(chat as unknown as Message[])?.map((message, index) => (
+              {(chat as unknown as ChatLoadData[])?.map((message, index) => (
                 <div key={index} className="mb-2">
-                  <p>{message?.chat}</p>
+                  <p>{message.chat.chat}</p>
                   <p suppressHydrationWarning>
-                    {message.from === params.username
-                      ? `From: You, Time: ${formatDate(message.time)} `
-                      : `From: ${message.from}, Time: ${formatDate(
-                          message.time
+                    {message.chat.from === params.username
+                      ? `From: You, Time: ${formatTimestamp(
+                          message.timestamp
+                        )} `
+                      : `From: ${message.chat.from}, Time: ${formatTimestamp(
+                          message.timestamp
                         )}`}
                   </p>
                 </div>
