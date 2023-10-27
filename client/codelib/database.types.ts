@@ -12,27 +12,23 @@ export interface Database {
       chats: {
         Row: {
           channel: string
-          chat: Json | null
+          chat: Json
+          pkey: string
           timestamp: string
         }
         Insert: {
           channel: string
-          chat?: Json | null
+          chat: Json
+          pkey?: string
           timestamp?: string
         }
         Update: {
           channel?: string
-          chat?: Json | null
+          chat?: Json
+          pkey?: string
           timestamp?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "chats_channel_fkey"
-            columns: ["channel"]
-            referencedRelation: "dms"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       dm_members: {
         Row: {

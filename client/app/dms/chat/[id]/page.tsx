@@ -11,6 +11,7 @@ type Message = {
 type ChatLoadData = {
   chat: Message;
   timestamp: string;
+  pkey: number;
 };
 export default async function Chats({ params }: { params: { id: String } }) {
   const cookieStore = cookies();
@@ -36,14 +37,14 @@ export default async function Chats({ params }: { params: { id: String } }) {
       // Data not found in cache, fetch it from the database
       const { data: chatsLoadData, error: chatsError } = await supabase
         .from("chats")
-        .select("chat, timestamp")
+        .select("chat, timestamp,pkey")
         .eq("channel", params.id)
-        .order("timestamp", { ascending: true })
+        .order("timestamp", { ascending: false })
         .range(0, 5);
-
-      if (chatsLoadData) {
+      const chatsLoadDataReversed = chatsLoadData?.reverse();
+      if (chatsLoadDataReversed) {
         // Store the fetched chats data in the cache for future use
-        const chats = chatsLoadData.map((chat) => JSON.stringify(chat));
+        const chats = chatsLoadDataReversed.map((chat) => JSON.stringify(chat));
 
         if (chats && chats.length > 0) {
           // const chatStrings: string[] = chats.map((chat) =>
@@ -54,7 +55,7 @@ export default async function Chats({ params }: { params: { id: String } }) {
           await redis.expire(keyChats, 60);
         }
 
-        return chatsLoadData;
+        return chatsLoadDataReversed;
       } else if (chatsError) {
         console.error(chatsError);
       }

@@ -1,15 +1,16 @@
 "use client";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { v4 as uuidv4 } from "uuid";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
+//const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
 import toast from "react-hot-toast";
+import { Inter } from "next/font/google";
 type Message = {
   from: string;
   chat: string;
@@ -17,6 +18,7 @@ type Message = {
 type ChatLoadData = {
   chat: Message;
   timestamp: string;
+  pkey: number;
 };
 type DateTimeFormatOptions = {};
 type MembersLoadData = Array<{ member: string }> | null;
@@ -47,10 +49,10 @@ export default function RealtimeChats({
 }) {
   const supabase = createClientComponentClient<Database>();
 
-  const handleSelectionChange = (selectedUsers: string[]) => {
-    setIsUserSelectorOpen(false);
-    setNewMembersID(selectedUsers);
-  };
+  // const handleSelectionChange = (selectedUsers: string[]) => {
+  //   setIsUserSelectorOpen(false);
+  //   setNewMembersID(selectedUsers);
+  // };
   const sendNewChat = async () => {
     const res = await fetch("/add/chat", {
       method: "post",
@@ -108,10 +110,11 @@ export default function RealtimeChats({
   const [image, setImage] = useState<File | null>(null);
   const [newChat, setnewChat] = useState<string>("");
   const [chat, setChat] = useState<ChatLoadData[] | null>(params.initialChats);
+  const firstChatRef = useRef(null);
   // const [members, setMembers] = useState<MembersLoadData>(
   //   params.initialMembers
   // );
-  const [newMembersID, setNewMembersID] = useState<string[]>([]);
+  //const [newMembersID, setNewMembersID] = useState<string[]>([]);
   const [isUserSelectorOpen, setIsUserSelectorOpen] = useState<boolean>(false);
   useEffect(() => {
     const channel = supabase
@@ -122,10 +125,13 @@ export default function RealtimeChats({
         (payload) => {
           setChat((chat) => {
             if (payload.new) {
-              console.log(payload.new);
               return [
                 ...(chat as ChatLoadData[]),
-                { chat: payload.new.chat, timestamp: payload.new.timestamp },
+                {
+                  chat: payload.new.chat,
+                  timestamp: payload.new.timestamp,
+                  pkey: payload.new.pkey,
+                },
               ];
             }
             return chat;
@@ -138,29 +144,45 @@ export default function RealtimeChats({
       supabase.removeChannel(channel);
     };
   }, [supabase, setChat]);
-  // useEffect(() => {
-  //   const channel = supabase
-  //     .channel("members")
-  //     .on(
-  //       "postgres_changes",
-  //       { event: "DELETE", schema: "public", table: "dm_members" },
-  //       (payload) => {
-  //         setMembers((members) => {
-  //           if (payload) {
-  //             console.log(payload);
-  //             //   return [...payload.new.chat];
-  //             window.
-  //           }
-  //           return members;
-  //         });
-  //       }
-  //     )
-  //     .subscribe();
 
-  //   return () => {
-  //     supabase.removeChannel(channel);
-  //   };
-  // }, [supabase, setChat]);
+  //Lazy Loading Code
+  if (typeof IntersectionObserver !== "undefined") {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        if (chat && chat.length > 0) {
+          const firstChat = chat[0];
+          const firstTimestamp = firstChat.timestamp;
+
+          fetchOlderChats(firstTimestamp);
+        }
+      }
+    });
+    useEffect(() => {
+      if (firstChatRef.current) {
+        observer.observe(firstChatRef.current);
+      }
+
+      return () => {
+        if (firstChatRef.current) {
+          observer.unobserve(firstChatRef.current);
+        }
+      };
+    }, [firstChatRef]);
+  }
+  const fetchOlderChats = async (timestamp: string) => {
+    const { data, error } = await supabase
+      .from("chats")
+      .select("chat,timestamp")
+      .lt("timestamp", timestamp)
+      .order("timestamp", { ascending: true })
+      .range(0, 10); // Load the next 10 older chats
+
+    if (data) {
+      setChat((chat) => {
+        return [...(data as ChatLoadData[]), ...(chat as ChatLoadData[])];
+      });
+    }
+  };
   return (
     <>
       <div>
@@ -169,7 +191,11 @@ export default function RealtimeChats({
             <h2>Chats:</h2>
             <div>
               {(chat as unknown as ChatLoadData[])?.map((message, index) => (
-                <div key={index} className="mb-2">
+                <div
+                  key={message.pkey}
+                  ref={index === 0 ? firstChatRef : null}
+                  className="mb-2"
+                >
                   <p>{message.chat.chat}</p>
                   <p suppressHydrationWarning>
                     {message.chat.from === params.username
