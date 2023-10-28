@@ -34,16 +34,19 @@ export interface Database {
         Row: {
           id: string | null
           member: string
+          name: string | null
           pkey: string
         }
         Insert: {
           id?: string | null
           member: string
+          name?: string | null
           pkey?: string
         }
         Update: {
           id?: string | null
           member?: string
+          name?: string | null
           pkey?: string
         }
         Relationships: [

@@ -8,10 +8,13 @@ function Video({ peer: peer }: { peer: SimplePeer.Instance }) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    // console.log(peer);
     peer.on("stream", (stream) => {
+      console.log(peer);
+      console.log(stream);
       if (ref.current) ref.current.srcObject = stream;
     });
-  }, []);
+  });
 
   return (
     <video ref={ref} autoPlay playsInline className="h-2/5 w-2/5 border" />
@@ -38,7 +41,8 @@ export default function Room({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     socketRef.current = SocketIOClient.io(
-      "http://viaduct.proxy.rlwy.net:23731"
+      // "http://viaduct.proxy.rlwy.net:23731"
+      "http://localhost:6969"
     );
     const fetchMembersAndSetupConnection = async () => {
       const {

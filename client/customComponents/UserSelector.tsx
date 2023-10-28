@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DialogClose } from "@radix-ui/react-dialog";
 type OnSelectionChangeType = (selectedUsers: string[]) => void;
 interface UserSelectorProps {
   onSelectionChange: OnSelectionChangeType;
@@ -59,18 +60,29 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
   };
   return (
     <div>
-      {profileData?.map((user) => (
-        <div key={user.id}>
-          <Checkbox
-            checked={selectedUsers.includes(user.email)}
-            onCheckedChange={() => handleUserSelection(user.email)}
-          />
-          {(user.raw_user_meta_data as custom_raw_user_meta_data)?.name}
-          <br />
-          Email: {user.email}
-        </div>
-      ))}
-      <Button onClick={() => onSelectionChange(selectedUsers)}>Confirm!</Button>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Add Members</Button>
+        </DialogTrigger>
+        <DialogContent>
+          {profileData?.map((user) => (
+            <div key={user.id}>
+              <Checkbox
+                checked={selectedUsers.includes(user.email)}
+                onCheckedChange={() => handleUserSelection(user.email)}
+              />
+              {(user.raw_user_meta_data as custom_raw_user_meta_data)?.name}
+              <br />
+              Email: {user.email}
+            </div>
+          ))}
+          <DialogClose asChild>
+            <Button onClick={() => onSelectionChange(selectedUsers)}>
+              Confirm!
+            </Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

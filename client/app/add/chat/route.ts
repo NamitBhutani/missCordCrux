@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import redis from "@/lib/redis";
 import { NextResponse } from 'next/server'
 import type { Database } from "@/codelib/database.types";
-type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
+
 type Message = {
     from: string;
     chat: string;
@@ -14,7 +14,7 @@ type ChatLoadData = {
 };
 export async function POST(request: Request) {
     const cookieStore = cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
     const { chat, username, newChat, id } = await request.json();
     const keyChats = `chats:${id}`;
     const {

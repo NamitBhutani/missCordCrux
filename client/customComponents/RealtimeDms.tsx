@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 type RearrangedItem = {
   id: string;
+  name: string;
 };
 export default function RealtimeDms({
   props,
@@ -65,7 +66,7 @@ export default function RealtimeDms({
               // return [...dms, payload.new.id];
               if (payload.new.member === props.email) {
                 // If the "member" column matches the user's email, add the ID to the state.
-                return [...dms, { id: payload.new.id }];
+                return [...dms, { id: payload.new.id, name: payload.new.name }];
               }
             }
             return dms;
@@ -93,23 +94,40 @@ export default function RealtimeDms({
                   href={`/dms/chat/${dm.id}`}
                   className={badgeVariants()}
                 >
-                  DM name goes here
+                  {dm.name}
                 </Link>
               </div>
             ))}
         </div>
         <div className="flex flex-col items-center">
           <div className="py-1 ">
-            <Dialog>
+            {/* <Dialog>
               <DialogTrigger asChild>
-                <Button className="bg-blue-500 hover:bg-blue-600 text-white ">
+                <Button
+                  className="bg-blue-500 hover:bg-blue-600 text-white "
+                  onClick={() => {
+                    setIsUserSelectorOpen(true);
+                  }}
+                >
                   Select Members
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <UserSelector onSelectionChange={handleSelectionChange} />
+                {isUserSelectorOpen && (
+                  <UserSelector onSelectionChange={handleSelectionChange} />
+                )}
               </DialogContent>
-            </Dialog>
+            </Dialog> */}
+            {/* <Button
+              className="bg-blue-500 hover:bg-blue-600 text-white "
+              onClick={() => {
+                setIsUserSelectorOpen(true);
+              }}
+            >
+              open
+            </Button> */}
+
+            <UserSelector onSelectionChange={handleSelectionChange} />
           </div>
           <div className="py-1">
             <Button

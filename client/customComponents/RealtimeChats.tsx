@@ -256,20 +256,21 @@ export default function RealtimeChats({
             </div>
           </div>
         </div>
-        {params.isAdmin && (
-          <div style={{ width: "20%" }}>
-            <p>Members:</p>
-            <div
-              className="flex flex-col justify-between px-2"
-              style={{ height: "96%", width: "100%" }}
-            >
-              <div>
-                <ul>
-                  {params.initialMembers?.map((member, index) => (
-                    <div key={index} className="flex flex-row justify-center">
-                      <div className="pr-2">
-                        <Badge variant="secondary">{member.member}</Badge>
-                      </div>
+
+        <div style={{ width: "20%" }}>
+          <p>Members:</p>
+          <div
+            className="flex flex-col justify-between px-2"
+            style={{ height: "96%", width: "100%" }}
+          >
+            <div>
+              <ul>
+                {params.initialMembers?.map((member, index) => (
+                  <div key={index} className="flex flex-row justify-center">
+                    <div className="pr-2">
+                      <Badge variant="secondary">{member.member}</Badge>
+                    </div>
+                    {params.isAdmin && (
                       <Button
                         onClick={() => {
                           kickMembers(member.member);
@@ -277,22 +278,23 @@ export default function RealtimeChats({
                       >
                         Kick
                       </Button>
-                    </div>
-                  ))}
-                </ul>
-              </div>
-
+                    )}
+                  </div>
+                ))}
+              </ul>
+            </div>
+            {params.isAdmin && (
               <Button
                 onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
                 className="mr-2"
               >
                 Invite
               </Button>
+            )}
 
-              {isUserSelectorOpen && <p>{`/dms/join/${params.id}`}</p>}
-            </div>
+            {isUserSelectorOpen && <p>{`/dms/join/${params.id}`}</p>}
           </div>
-        )}
+        </div>
       </div>
     </>
   );

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import redis from "@/lib/redis";
 import { NextResponse } from 'next/server'
 import { v5 as uuidv5 } from "uuid";
+let dmName: string
 export async function POST(request: Request) {
   function generateUUIDFromValues(values: string[]) {
     const uniqueString = values.join("");
@@ -10,6 +11,7 @@ export async function POST(request: Request) {
     const generatedUUID = uuidv5(uniqueString, namespace);
     return generatedUUID;
   }
+
   const cookieStore = cookies();
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
   const { newMembersID, email } = await request.json();
@@ -30,9 +32,23 @@ export async function POST(request: Request) {
     if (dmExists === "exists") {
       return NextResponse.json({ message: 'DM already exists!', status: 400 }, { status: 400 })
     }
+    await fetch("https://random-word-api.herokuapp.com/word?number=2")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.length === 2) {
+          const combinedWord = data.join('-');
+          dmName = combinedWord;
+        } else {
+          console.error('Unexpected data format');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     const { error: newDMInsertError } = await supabase.from("dms").insert({
       id: newDMId,
       admin: email,
+
     });
     if (newDMInsertError) {
       return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
@@ -43,6 +59,7 @@ export async function POST(request: Request) {
       .insert({
         id: newDMId,
         member: email,
+        name: dmName,
       });
     const memberDmsKey = `dms:${email}`;
 

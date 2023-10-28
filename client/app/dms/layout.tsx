@@ -6,6 +6,7 @@ import RealtimeDms from "@/customComponents/RealtimeDms";
 import redis from "@/lib/redis";
 type RearrangedItem = {
   id: string;
+  name: string;
 };
 let dmsLoadData;
 export default async function DMS({ children }: { children: React.ReactNode }) {
@@ -16,14 +17,14 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
     if (cachedDMs.length > 0) {
       // Data found in cache, parse and return it
       const convertedDMs = cachedDMs.map((dm) => {
-        return { id: JSON.parse(dm) };
+        return { id: dm };
       });
       return convertedDMs;
     } else {
       // Data not found in cache, fetch it from the database
       const { data, error } = await supabase
         .from("dm_members")
-        .select("id")
+        .select("id, name")
         .eq("member", memberEmail);
       const fetchedDMs = data || [];
       if (error) {
@@ -33,10 +34,7 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
       // Store the fetched DMs in the cache for future use
       if (fetchedDMs.length > 0) {
         await redis.ltrim(key, -1, -1);
-        await redis.rpush(
-          key,
-          ...fetchedDMs.map((dm) => JSON.stringify(dm.id))
-        );
+        await redis.rpush(key, ...fetchedDMs.map((dm) => dm.id as string));
         await redis.expire(key, 60);
 
         return fetchedDMs;
