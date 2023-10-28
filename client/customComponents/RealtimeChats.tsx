@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import Image from "next/image";
 //const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
 import toast from "react-hot-toast";
-
+const regex = /^https:\/\/mdfwcmjgyognahhbvewj\.supabase\.co.*\.png$/;
 type Message = {
   from: string;
   chat: string;
@@ -99,10 +99,10 @@ export default function RealtimeChats({
       .from("chat-uploads")
       .upload(`${params.id}/${fileName}.png`, image);
 
-    const { data, error } = await supabase.storage
+    const { data } = await supabase.storage
       .from("chat-uploads")
-      .createSignedUrl(`${params.id}/${fileName}.png`, 60, { download: true });
-    setnewChat(data?.signedUrl || "");
+      .getPublicUrl(`${params.id}/${fileName}.png`);
+    setnewChat(data?.publicUrl || "");
   };
   const [isUploadSelectorVisible, setIsUploadSelectorVisible] =
     useState<boolean>(false);
@@ -212,7 +212,16 @@ export default function RealtimeChats({
                   // }}
                 >
                   <p className="" style={{ overflowWrap: "anywhere" }}>
-                    {message.chat.chat}
+                    {regex.test(message.chat.chat) ? (
+                      <Image
+                        src={message.chat.chat}
+                        width={500}
+                        height={500}
+                        alt="Picture of the author"
+                      />
+                    ) : (
+                      message.chat.chat
+                    )}
                   </p>
                   <p suppressHydrationWarning>
                     {message.chat.from === params.username
