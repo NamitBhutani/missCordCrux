@@ -6,7 +6,7 @@ const app: Application = express();
 const server = http.createServer(app);
 const io: Server = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.CORS_URL,
 
     }
 });
