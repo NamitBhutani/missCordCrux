@@ -120,7 +120,12 @@ export default function RealtimeChats({
       .channel("*")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "chats" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chats",
+          filter: `channel=eq.${params.id}`,
+        },
         (payload) => {
           setChat((chat) => {
             if (payload.new) {
