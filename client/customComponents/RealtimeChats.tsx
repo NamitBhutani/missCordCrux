@@ -127,8 +127,8 @@ export default function RealtimeChats({
           filter: `channel=eq.${params.id}`,
         },
         (payload) => {
-          setChat((chat) => {
-            if (payload.new) {
+          if (payload.new) {
+            setChat((chat) => {
               return [
                 ...(chat as ChatLoadData[]),
                 {
@@ -137,9 +137,11 @@ export default function RealtimeChats({
                   pkey: payload.new.pkey,
                 },
               ];
-            }
-            return chat;
-          });
+            });
+          } else
+            setChat((chat) => {
+              return chat;
+            });
         }
       )
       .subscribe();
