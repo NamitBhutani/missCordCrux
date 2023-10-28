@@ -1,10 +1,10 @@
 import { Redis } from "ioredis";
 const redis = new Redis(
-    //     {
-    //     host: 'viaduct.proxy.rlwy.net',
-    //     port: 25755,
-    //     password: 'CCh1Ao5aDkfanhMhJKGH221aBgAd6J6P'
-    // }
+    {
+        host: process.env.NEXT_PUBLIC_REDIS_HOST,
+        port: process.env.NEXT_PUBLIC_REDIS_PORT as unknown as number,
+        password: process.env.NEXT_PUBLIC_REDIS_PASSWORD,
+    }
 );
 
 export default redis;

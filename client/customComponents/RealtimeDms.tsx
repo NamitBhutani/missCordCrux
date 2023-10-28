@@ -7,15 +7,7 @@ import { badgeVariants } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import toast from "react-hot-toast";
 type RearrangedItem = {
   id: string;
@@ -34,7 +26,11 @@ export default function RealtimeDms({
   const addNewDM = async () => {
     const res = await fetch("/add/dm", {
       method: "post",
-      body: JSON.stringify({ newMembersID: newMembersID, email: props.email }),
+      body: JSON.stringify({
+        newMembersID: newMembersID,
+        email: props.email,
+        currentDms: dms,
+      }),
     });
     const data = await res.json();
     if (data.status === 200) {

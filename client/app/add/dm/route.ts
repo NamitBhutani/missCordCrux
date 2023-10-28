@@ -4,7 +4,10 @@ import redis from "@/lib/redis";
 import { NextResponse } from 'next/server'
 import { v5 as uuidv5 } from "uuid";
 let dmName: string
-
+type RearrangedItem = {
+  id: string;
+  name: string;
+};
 export async function POST(request: Request) {
   function generateUUIDFromValues(values: string[]) {
     const uniqueString = values.join("");
@@ -15,7 +18,7 @@ export async function POST(request: Request) {
 
   const cookieStore = cookies();
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-  const { newMembersID, email } = await request.json();
+  const { newMembersID, email, currentDms } = await request.json();
   try {
     const {
       data: { session },
@@ -27,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Empty fields detected!', status: 400 }, { status: 400 })
     }
     const newDMId = generateUUIDFromValues(newMembersID);
-
+    const memberDmsKey = `dms:${email}`;
     // Check if DM ID exists in the cache
     const dmExists = await redis.get(`dms:${newDMId}`);
     if (dmExists === "exists") {
@@ -46,11 +49,22 @@ export async function POST(request: Request) {
       .catch((error) => {
         console.error('Error:', error);
       });
+    const updatedDms = [...currentDms as RearrangedItem[], { id: newDMId, name: dmName }]
+    const dmStrings: string[] = updatedDms.map((dm) => JSON.stringify(dm));
     const { error: newDMInsertError } = await supabase.from("dms").insert({
       id: newDMId,
       admin: email,
 
     });
+    const cachedDms = await redis.lrange(`dms:${email}`, 0, -1);
+    if (cachedDms !== dmStrings) {
+      await redis.ltrim(memberDmsKey, -1, -1)
+      await redis.rpush(memberDmsKey, ...dmStrings)
+      await redis.expire(memberDmsKey, 60)
+    } else {
+      await redis.rpush(memberDmsKey, JSON.stringify({ id: newDMId, name: dmName }))
+      await redis.expire(memberDmsKey, 60)
+    }
     if (newDMInsertError) {
       return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
     }
@@ -62,12 +76,6 @@ export async function POST(request: Request) {
         member: email,
         name: dmName,
       });
-    const memberDmsKey = `dms:${email}`;
-
-
-    await redis.rpush(memberDmsKey, newDMId);
-    // console.log("memberDmsKey set for logged in", memberDmsKey);
-    await redis.expire(memberDmsKey, 60);
 
 
     newMembersID.forEach(async (member: any) => {
@@ -83,7 +91,9 @@ export async function POST(request: Request) {
     const { error: chatInsertError } = await supabase.from("chats").insert({
       channel: newDMId,
     });
-
+    if (adminMemberInsertError || chatInsertError) {
+      return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
+    }
     // Cache the new DM ID
     await redis.set(`dms:${newDMId}`, "exists");
     return NextResponse.json({ message: 'success', status: 200 }, { status: 200 })

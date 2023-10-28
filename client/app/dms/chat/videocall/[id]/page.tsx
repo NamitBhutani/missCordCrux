@@ -41,8 +41,8 @@ export default function Room({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     socketRef.current = SocketIOClient.io(
-      // "http://viaduct.proxy.rlwy.net:23731"
-      "http://localhost:6969"
+      process.env.NEXT_PUBLIC_IO_URL as string
+      // "http://localhost:6969"
     );
     const fetchMembersAndSetupConnection = async () => {
       const {
