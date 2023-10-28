@@ -3,6 +3,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
 import RealtimeChats from "@/customComponents/RealtimeChats";
 import redis from "@/lib/redis";
+import toast from "react-hot-toast";
 type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
 type Message = {
   from: string;
@@ -68,7 +69,7 @@ export default async function Chats({ params }: { params: { id: String } }) {
 
         return chatsLoadDataReversed;
       } else if (chatsError) {
-        console.error(chatsError);
+        toast.error("Error Loading Chats!");
       }
     }
   }

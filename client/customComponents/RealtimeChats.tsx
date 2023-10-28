@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 
 //const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
 import toast from "react-hot-toast";
-import { Inter } from "next/font/google";
+
 type Message = {
   from: string;
   chat: string;

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { Database } from "@/codelib/database.types";
 import RealtimeDms from "@/customComponents/RealtimeDms";
 import redis from "@/lib/redis";
+import toast from "react-hot-toast";
 type RearrangedItem = {
   id: string;
   name: string;
@@ -28,7 +29,7 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
         .eq("member", memberEmail);
       const fetchedDMs = data || [];
       if (error) {
-        console.error(error);
+        toast.error("Something went wrong!");
         return [];
       }
       // Store the fetched DMs in the cache for future use

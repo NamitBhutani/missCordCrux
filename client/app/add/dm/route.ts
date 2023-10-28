@@ -4,6 +4,7 @@ import redis from "@/lib/redis";
 import { NextResponse } from 'next/server'
 import { v5 as uuidv5 } from "uuid";
 let dmName: string
+
 export async function POST(request: Request) {
   function generateUUIDFromValues(values: string[]) {
     const uniqueString = values.join("");
@@ -87,7 +88,9 @@ export async function POST(request: Request) {
     await redis.set(`dms:${newDMId}`, "exists");
     return NextResponse.json({ message: 'success', status: 200 }, { status: 200 })
   } catch (error) {
+
     console.error(error);
+    return NextResponse.json({ message: 'error', status: 400 }, { status: 400 })
   }
 
 }

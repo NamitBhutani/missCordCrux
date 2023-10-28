@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: 'http://localhost:3000/auth/callback'
+            redirectTo: 'https://miss-cord-crux.vercel.app/auth/callback'
         }
     })
 

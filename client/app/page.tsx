@@ -26,6 +26,9 @@ export default async function Home() {
           >
             Profile
           </Link>
+          <Link className={buttonVariants({ variant: "outline" })} href="/dms">
+            Dms
+          </Link>
         </div>
       </div>
     );

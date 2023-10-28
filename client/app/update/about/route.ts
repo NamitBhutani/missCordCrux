@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server'
 import type { Database } from '@/codelib/database.types'
 export async function POST(request: Request) {
 
-    const formData = await request.formData()
-    const about = String(formData.get('about'))
+    const { about } = await request.json()
+
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore })
 
@@ -19,10 +19,11 @@ export async function POST(request: Request) {
         .eq('email', user?.email || '')
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ message: "Error updating about", status: 400 }, { status: 400 })
     }
     else {
-        return NextResponse.json({ message: 'success' }, { status: 200 })
+        return NextResponse.json({ message: 'About updated!', status: 200 }, { status: 200 })
+        //return NextResponse.redirect('/profile', { status: 200 })
     }
 
 }
