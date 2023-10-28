@@ -202,8 +202,12 @@ export default function RealtimeChats({
               // style={{ height: "60vh" }}
             >
               {(chat as unknown as ChatLoadData[])?.map((message, index) => (
-                <div key={message.pkey} ref={index === 0 ? firstChatRef : null}>
-                  <p style={{ whiteSpace: "initial" }}>{message.chat.chat}</p>
+                <div
+                  key={message.pkey}
+                  ref={index === 0 ? firstChatRef : null}
+                  className="break-words"
+                >
+                  <p>{message.chat.chat}</p>
                   <p suppressHydrationWarning>
                     {message.chat.from === params.username
                       ? `From: You, Time: ${formatTimestamp(
