@@ -14,7 +14,7 @@ export default async function Profile() {
   } = await supabase.auth.getUser();
   return (
     <div>
-      <div className="mt-4 text-center">Enter About</div>
+      <div className="mt-4 text-center">Profile</div>
       <form
         action="/update/about"
         method="post"

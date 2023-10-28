@@ -3,6 +3,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 export default function Avatar() {
   const [image, setImage] = useState<File | null>(null);
   const supabase = createClientComponentClient();
@@ -16,10 +17,21 @@ export default function Avatar() {
         .from("profiles")
         .select("id")
         .eq("email", user?.email || "");
+
       if (data && data[0] && data[0].id) {
-        await supabase.storage
+        const { error: deleteErr } = await supabase.storage
           .from("profile-images")
-          .update(`avatar_${data[0].id}.png`, image);
+          .remove([`avatar_${data[0].id}.png`]);
+        const { error: uploadErr } = await supabase.storage
+          .from("profile-images")
+          .upload(`avatar_${data[0].id}.png`, image);
+        if (deleteErr || uploadErr) {
+          toast.error("Error uploading image");
+        } else {
+          toast.success("Image uploaded successfully");
+        }
+      } else {
+        toast.error("Error uploading image");
       }
     }
   };

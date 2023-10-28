@@ -70,7 +70,9 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <RealtimeDms props={params} />
+      <div className="px-2">
+        <RealtimeDms props={params} />
+      </div>
     </>
   );
 }

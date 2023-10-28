@@ -4,16 +4,18 @@ import * as SocketIOClient from "socket.io-client";
 import Peer, * as SimplePeer from "simple-peer";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
-function CustomVideo({ peer: peer }: { peer: SimplePeer.Instance }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+function Video({ peer: peer }: { peer: SimplePeer.Instance }) {
+  const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     peer.on("stream", (stream) => {
-      if (videoRef.current) videoRef.current.srcObject = stream;
+      if (ref.current) ref.current.srcObject = stream;
     });
   }, []);
 
-  return <video ref={videoRef} autoPlay playsInline />;
+  return (
+    <video ref={ref} autoPlay playsInline className="h-2/5 w-2/5 border" />
+  );
 }
 
 let videoSize: { height: number; width: number };
@@ -23,7 +25,7 @@ if (typeof window !== "undefined") {
     width: window.innerWidth / 2,
   };
 }
-export default function VideoCall({ params }: { params: { id: string } }) {
+export default function Room({ params }: { params: { id: string } }) {
   const supabase = createClientComponentClient<Database>();
   const [peers, setPeers] = useState<
     { peerID: string; peer: SimplePeer.Instance }[]
@@ -35,7 +37,9 @@ export default function VideoCall({ params }: { params: { id: string } }) {
   const roomID = params.id;
 
   useEffect(() => {
-    socketRef.current = SocketIOClient.io("http://localhost:6969");
+    socketRef.current = SocketIOClient.io(
+      "http://viaduct.proxy.rlwy.net:23731"
+    );
     const fetchMembersAndSetupConnection = async () => {
       const {
         data: { user },
@@ -169,16 +173,16 @@ export default function VideoCall({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="flex flex-wrap">
+    <div className="flex flex-wrap m-auto p-6 h-screen">
       <video
         ref={userVideoRef}
         playsInline
         autoPlay
         muted
-        className="h-40 w-50"
+        className="h-2/5 w-2/5 "
       />
       {peers.map((peer) => (
-        <CustomVideo key={peer.peerID} peer={peer.peer} />
+        <Video key={peer.peerID} peer={peer.peer} />
       ))}
     </div>
   );

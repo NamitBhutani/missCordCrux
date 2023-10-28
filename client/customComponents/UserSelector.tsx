@@ -4,6 +4,15 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 type OnSelectionChangeType = (selectedUsers: string[]) => void;
 interface UserSelectorProps {
   onSelectionChange: OnSelectionChangeType;

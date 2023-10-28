@@ -21,6 +21,17 @@ export default async function Chats({ params }: { params: { id: String } }) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (user && user.email) {
+    const { data, error } = await supabase
+      .from("dm_members")
+      .select("member")
+      .eq("id", params.id)
+      .eq("member", user?.email);
+    if (data?.length === 0) {
+      return <h1>Not a Member</h1>;
+    }
+  }
+
   const keyChats = `chats:${params.id}`;
 
   async function getChatsLoadData() {
@@ -84,7 +95,9 @@ export default async function Chats({ params }: { params: { id: String } }) {
 
   return (
     <>
-      <RealtimeChats params={paramsForChild} />
+      <div style={{ width: "90vw", height: "100vh" }}>
+        <RealtimeChats params={paramsForChild} />
+      </div>
     </>
   );
 }

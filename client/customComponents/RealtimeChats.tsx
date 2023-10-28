@@ -3,7 +3,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import dynamic from "next/dynamic";
 import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,16 +146,19 @@ export default function RealtimeChats({
 
   //Lazy Loading Code
   if (typeof IntersectionObserver !== "undefined") {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        if (chat && chat.length > 0) {
-          const firstChat = chat[0];
-          const firstTimestamp = firstChat.timestamp;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          if (chat && chat.length > 0) {
+            const firstChat = chat[0];
+            const firstTimestamp = firstChat.timestamp;
 
-          fetchOlderChats(firstTimestamp);
+            fetchOlderChats(firstTimestamp);
+          }
         }
-      }
-    });
+      },
+      { rootMargin: "20px" }
+    );
     useEffect(() => {
       if (firstChatRef.current) {
         observer.observe(firstChatRef.current);
@@ -185,17 +187,22 @@ export default function RealtimeChats({
   };
   return (
     <>
-      <div>
-        <div>
-          <div>
+      <div
+        className="flex flex-row justify-between border	"
+        style={{ width: "100%", height: "86%" }}
+      >
+        <div
+          className=" flex flex-col justify-between border"
+          style={{ width: "80%" }}
+        >
+          <div className=" border">
             <h2>Chats:</h2>
-            <div>
+            <div
+              className=" flex flex-col justify-evenly overflow-y-auto "
+              // style={{ height: "60vh" }}
+            >
               {(chat as unknown as ChatLoadData[])?.map((message, index) => (
-                <div
-                  key={message.pkey}
-                  ref={index === 0 ? firstChatRef : null}
-                  className="mb-2"
-                >
+                <div key={message.pkey} ref={index === 0 ? firstChatRef : null}>
                   <p>{message.chat.chat}</p>
                   <p suppressHydrationWarning>
                     {message.chat.from === params.username
@@ -211,20 +218,24 @@ export default function RealtimeChats({
             </div>
           </div>
           <div>
-            <div>
+            <div className=" flex flex-col justify-evenly items-center">
               <Input
                 type="text"
                 placeholder="Type a new chat"
                 value={newChat}
                 onChange={(e) => setnewChat(e.target.value)}
+                className="mb-2"
               />
-              <Button
-                onClick={() => {
-                  sendNewChat();
-                }}
-              >
-                Send New Chat
-              </Button>
+
+              <div className="py-2">
+                <Button
+                  onClick={() => {
+                    sendNewChat();
+                  }}
+                >
+                  Send
+                </Button>
+              </div>
               {isUploadSelectorVisible && (
                 <Input
                   type="file"
@@ -238,44 +249,50 @@ export default function RealtimeChats({
                   setIsUploadSelectorVisible(!isUploadSelectorVisible),
                     uploadNewFile();
                 }}
+                className="mb-2"
               >
-                Upload File
+                Upload
               </Button>
             </div>
           </div>
         </div>
-        <div>
-          <h2>Members:</h2>
-          <ul>
-            {params.initialMembers?.map((member, index) => (
-              <li key={index}>
-                <div>
-                  <Badge variant="secondary">{member.member}</Badge>
-                  <Button
-                    onClick={() => {
-                      kickMembers(member.member);
-                    }}
-                  >
-                    kik
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-          {params.isAdmin && (
-            <div>
+        {params.isAdmin && (
+          <div style={{ width: "20%" }}>
+            <p>Members:</p>
+            <div
+              className="flex flex-col justify-between px-2"
+              style={{ height: "96%", width: "100%" }}
+            >
+              <div>
+                <ul>
+                  {params.initialMembers?.map((member, index) => (
+                    <div key={index} className="flex flex-row justify-center">
+                      <div className="pr-2">
+                        <Badge variant="secondary">{member.member}</Badge>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          kickMembers(member.member);
+                        }}
+                      >
+                        Kick
+                      </Button>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
               <Button
                 onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
+                className="mr-2"
               >
-                Show invite link
+                Invite
               </Button>
-              {isUserSelectorOpen && (
-                <p>{`/dms/join/${params.id}`}</p>
-                // <UserSelector onSelectionChange={handleSelectionChange} />
-              )}
+
+              {isUserSelectorOpen && <p>{`/dms/join/${params.id}`}</p>}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   );

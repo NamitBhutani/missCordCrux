@@ -7,6 +7,15 @@ import { badgeVariants } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import toast from "react-hot-toast";
 type RearrangedItem = {
   id: string;
@@ -71,43 +80,51 @@ export default function RealtimeDms({
   }, [supabase]);
 
   return (
-    <div>
-      {/* Sidebar for DMs */}
-      <div>
-        <h1>DMS</h1>
-        <div>
+    <div className=" flex flex-row justify-evenly" style={{ height: "86vh" }}>
+      {/* Left Column for DMs */}
+      <div className=" flex flex-col  justify-between">
+        <div className="flex flex-col justify-around flex-nowrap">
           {dms &&
             dms.map((dm) => (
-              <div key={dm.id}>
-                <Link href={`/dms/chat/${dm.id}`} className={badgeVariants()}>
+              <div key={dm.id} className="py-2 ">
+                <Link
+                  key={dm.id}
+                  prefetch={true}
+                  href={`/dms/chat/${dm.id}`}
+                  className={badgeVariants()}
+                >
                   DM name goes here
                 </Link>
               </div>
             ))}
         </div>
-
-        {isUserSelectorOpen && (
-          <UserSelector onSelectionChange={handleSelectionChange} />
-        )}
+        <div className="flex flex-col items-center">
+          <div className="py-1 ">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-500 hover:bg-blue-600 text-white ">
+                  Select Members
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <UserSelector onSelectionChange={handleSelectionChange} />
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="py-1">
+            <Button
+              onClick={addNewDM}
+              className="bg-blue-500 hover:bg-blue-600 text-white "
+            >
+              Start DM
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Main content area for chat messages */}
-      <div>{props.children}</div>
-
-      {/* Buttons on the right */}
-      <div>
-        <Button
-          onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-4"
-        >
-          Select Members for DM
-        </Button>
-        <Button
-          onClick={addNewDM}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Start a New DM
-        </Button>
+      {/* Right Column for Chats */}
+      <div className="px-2 border" style={{ width: "94%" }}>
+        <div>{props.children}</div>
       </div>
     </div>
   );
