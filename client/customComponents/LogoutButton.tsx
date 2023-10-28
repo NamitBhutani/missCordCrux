@@ -9,13 +9,15 @@ function LogoutButton() {
     window.location.reload();
   };
   return (
-    <Button
-      onClick={() => {
-        logout();
-      }}
-    >
-      Logout
-    </Button>
+    <div>
+      <Button
+        onClick={() => {
+          logout();
+        }}
+      >
+        Logout
+      </Button>
+    </div>
   );
 }
 
