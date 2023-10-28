@@ -62,4 +62,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = 6969;
-server.listen(PORT, () => console.log(`Server running`));
+server.listen(PORT, '::', () => console.log(`Server running`));

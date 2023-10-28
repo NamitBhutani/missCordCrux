@@ -132,7 +132,7 @@ export default function Room({ params }: { params: { id: string } }) {
       }
     };
     fetchMembersAndSetupConnection();
-  }, []);
+  });
 
   function makePeer(
     userToSignal: string,

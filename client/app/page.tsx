@@ -21,15 +21,14 @@ export default async function Home() {
         <div className="p-4 rounded shadow-md">
           <div className="text-center">Welcome, {user?.user_metadata.name}</div>
           <Image src={Pic} alt="Picture of the author" />
-          <Link
-            className={buttonVariants({ variant: "outline" })}
-            href="/profile"
-          >
-            Profile
-          </Link>
-          <Link className={buttonVariants({ variant: "outline" })} href="/dms">
-            Dms
-          </Link>
+          <div className="flex flex-row justify-around py-2">
+            <Link className={buttonVariants({})} href="/profile">
+              Profile
+            </Link>
+            <Link className={buttonVariants({})} href="/dms">
+              Dms
+            </Link>
+          </div>
         </div>
       </div>
     );
