@@ -188,26 +188,32 @@ export default function RealtimeChats({
   return (
     <>
       <div
-        className="flex flex-row justify-between border	"
+        className="flex flex-row justify-between "
         style={{ width: "100%", height: "86%" }}
       >
         <div
           className=" flex flex-col justify-between border"
           style={{ width: "80%" }}
         >
-          <div className=" border">
+          <div className="">
             <h2>Chats:</h2>
             <div
-              className=" flex flex-col justify-evenly overflow-y-auto "
+              className=" flex flex-col justify-evenly "
               // style={{ height: "60vh" }}
             >
               {(chat as unknown as ChatLoadData[])?.map((message, index) => (
                 <div
                   key={message.pkey}
                   ref={index === 0 ? firstChatRef : null}
-                  className="break-words"
+                  className=""
+                  // style={{
+                  //   width: "100%",
+                  //   overflow: "hidden",
+                  // }}
                 >
-                  <p>{message.chat.chat}</p>
+                  <p className="" style={{ overflowWrap: "anywhere" }}>
+                    {message.chat.chat}
+                  </p>
                   <p suppressHydrationWarning>
                     {message.chat.from === params.username
                       ? `From: You, Time: ${formatTimestamp(
