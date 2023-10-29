@@ -64,6 +64,6 @@ io.on('connection', (socket) => {
     });
 });
 const port = process.env.PORT as unknown as number
-const hostname = "::"
 
-server.listen(port, hostname, () => { console.log(`Server running on ${port}`) });
+
+server.listen(port, () => { console.log(`Server running on ${port}`) });
