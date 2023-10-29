@@ -8,7 +8,7 @@ const redirectUrl = "/api/test";
 const targetUrl = "http://viaduct.proxy.rlwy.net:29260";
 
 // Create a middleware that performs the redirection
-app.use(redirectUrl, (req, res) => {
+app.use("/", (req, res) => {
   // Redirect to the target URL
   res.redirect(targetUrl);
 });
