@@ -1,0 +1,13 @@
+services:
+  redis:
+    build: ./redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/bitnami
+  node:
+    build: ./webRTCServer
+    ports:
+      - "8001:8001"
+volumes:
+  redis-data:

@@ -8,13 +8,14 @@ function Video({ peer: peer }: { peer: SimplePeer.Instance }) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
-    // console.log(peer);
+    console.log("outside on stream");
+    console.log(peer);
     peer.on("stream", (stream) => {
-      console.log(peer);
+      console.log("on stream");
       console.log(stream);
       if (ref.current) ref.current.srcObject = stream;
     });
-  });
+  }, []);
 
   return (
     <video ref={ref} autoPlay playsInline className="h-2/5 w-2/5 border" />
@@ -42,7 +43,6 @@ export default function Room({ params }: { params: { id: string } }) {
   useEffect(() => {
     socketRef.current = SocketIOClient.io(
       process.env.NEXT_PUBLIC_IO_URL as string
-      // "http://localhost:6969"
     );
     const fetchMembersAndSetupConnection = async () => {
       const {
@@ -132,7 +132,7 @@ export default function Room({ params }: { params: { id: string } }) {
       }
     };
     fetchMembersAndSetupConnection();
-  });
+  }, []);
 
   function makePeer(
     userToSignal: string,

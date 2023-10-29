@@ -5,7 +5,7 @@
   "scripts": {
     "start:ts": "tsc -w",
     "start:js": "nodemon dist/server.js",
-    "start": "concurrently pnpm:start:*"
+    "start": "concurrently npm:start:*"
   },
   "keywords": [],
   "author": "",

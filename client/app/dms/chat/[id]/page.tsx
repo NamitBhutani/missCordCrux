@@ -8,6 +8,7 @@ type Chats = Database["public"]["Tables"]["chats"]["Row"]["chat"];
 type Message = {
   from: string;
   chat: string;
+  isMarkdown: boolean;
 };
 type ChatLoadData = {
   chat: Message;
@@ -41,7 +42,9 @@ export default async function Chats({ params }: { params: { id: String } }) {
 
     if (cachedChats.length > 0) {
       // Data found in cache, parse and return it
+      console.log("cahce hit");
       const chats: ChatLoadData[] = cachedChats.map((chat) => JSON.parse(chat));
+      console.log(chats);
       return chats;
       // const chats = JSON.parse(cachedChats);
       // return chats;
@@ -49,27 +52,28 @@ export default async function Chats({ params }: { params: { id: String } }) {
       // Data not found in cache, fetch it from the database
       const { data: chatsLoadData, error: chatsError } = await supabase
         .from("chats")
-        .select("chat, timestamp,pkey")
+        .select("chat,timestamp,pkey")
         .eq("channel", params.id)
         .order("timestamp", { ascending: false })
         .range(0, 5);
-      const chatsLoadDataReversed = chatsLoadData?.reverse();
-      if (chatsLoadDataReversed) {
-        // Store the fetched chats data in the cache for future use
-        const chats = chatsLoadDataReversed.map((chat) => JSON.stringify(chat));
+      if (chatsLoadData && chatsLoadData.length > 0) {
+        const chatsLoadDataReversed = chatsLoadData.reverse();
 
+        const chats = chatsLoadDataReversed.map((chat) => JSON.stringify(chat));
         if (chats && chats.length > 0) {
           // const chatStrings: string[] = chats.map((chat) =>
           //   JSON.stringify(chat)
           // );
-          await redis.ltrim(keyChats, -1, -1);
+          await redis.del(keyChats);
           await redis.rpush(keyChats, ...chats);
           await redis.expire(keyChats, 60);
-        }
 
-        return chatsLoadDataReversed;
+          return chatsLoadData;
+        }
       } else if (chatsError) {
         toast.error("Error Loading Chats!");
+      } else if (chatsLoadData.length === 0) {
+        return null;
       }
     }
   }
@@ -89,7 +93,9 @@ export default async function Chats({ params }: { params: { id: String } }) {
   const paramsForChild = {
     id: params.id,
     username: user?.user_metadata.name,
-    initialChats: (await getChatsLoadData()) as unknown as ChatLoadData[],
+    initialChats: (await getChatsLoadData()) as unknown as
+      | ChatLoadData[]
+      | null,
     initialMembers: membersLoadData,
     isAdmin: (adminLoadData && adminLoadData.admin === user?.email) as boolean,
   };

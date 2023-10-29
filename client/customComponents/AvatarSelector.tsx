@@ -46,6 +46,7 @@ export default function Avatar() {
         onChange={(e) => setImage(e.target.files?.[0] || null)}
       />
       <Button onClick={handleSubmit}>Submit Image</Button>
+      <p>Limit:5 MB, *.png only</p>
     </div>
   );
 }

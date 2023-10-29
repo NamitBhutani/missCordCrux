@@ -34,7 +34,7 @@ export default async function DMS({ children }: { children: React.ReactNode }) {
       }
       // Store the fetched DMs in the cache for future use
       if (fetchedDMs.length > 0) {
-        await redis.ltrim(key, -1, -1);
+        await redis.del(key);
         await redis.rpush(
           key,
           ...fetchedDMs.map((dm) =>

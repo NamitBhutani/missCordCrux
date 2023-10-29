@@ -7,12 +7,17 @@ import type { Database } from "@/codelib/database.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-//const UserSelector = dynamic(() => import("@/customComponents/UserSelector"));
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { sanitizeHtml } from "@/lib/domPurify";
+import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
+
 const regex = /^https:\/\/mdfwcmjgyognahhbvewj\.supabase\.co.*\.png$/;
 type Message = {
   from: string;
   chat: string;
+  isMarkdown: boolean;
 };
 type ChatLoadData = {
   chat: Message;
@@ -41,7 +46,7 @@ export default function RealtimeChats({
   params: {
     id: String;
     username: string;
-    initialChats: ChatLoadData[];
+    initialChats: ChatLoadData[] | null;
     initialMembers: MembersLoadData;
     isAdmin: boolean;
   };
@@ -60,6 +65,7 @@ export default function RealtimeChats({
         username: params.username,
         newChat: newChat,
         id: params.id,
+        isMarkdown: isMarkdown,
       }),
     });
     const data = await res.json();
@@ -109,6 +115,7 @@ export default function RealtimeChats({
   const [image, setImage] = useState<File | null>(null);
   const [newChat, setnewChat] = useState<string>("");
   const [chat, setChat] = useState<ChatLoadData[] | null>(params.initialChats);
+  const [isMarkdown, setIsMarkdown] = useState<boolean>(false);
   const firstChatRef = useRef(null);
   // const [members, setMembers] = useState<MembersLoadData>(
   //   params.initialMembers
@@ -129,14 +136,24 @@ export default function RealtimeChats({
         (payload) => {
           if (payload.new) {
             setChat((chat) => {
-              return [
-                ...(chat as ChatLoadData[]),
-                {
-                  chat: payload.new.chat,
-                  timestamp: payload.new.timestamp,
-                  pkey: payload.new.pkey,
-                },
-              ];
+              if (chat !== null && chat.length > 0) {
+                return [
+                  ...(chat as ChatLoadData[]),
+                  {
+                    chat: payload.new.chat,
+                    timestamp: payload.new.timestamp,
+                    pkey: payload.new.pkey,
+                  },
+                ];
+              } else {
+                return [
+                  {
+                    chat: payload.new.chat,
+                    timestamp: payload.new.timestamp,
+                    pkey: payload.new.pkey,
+                  },
+                ];
+              }
             });
           } else
             setChat((chat) => {
@@ -152,42 +169,44 @@ export default function RealtimeChats({
   }, [supabase, setChat]);
 
   //Lazy Loading Code
-  if (typeof IntersectionObserver !== "undefined") {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          if (chat && chat.length > 0) {
-            const firstChat = chat[0];
-            const firstTimestamp = firstChat.timestamp;
+  // if (typeof IntersectionObserver !== "undefined") {
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0].isIntersecting) {
+  //         if (chat && chat.length > 0) {
+  //           const firstChat = chat[0];
+  //           const firstTimestamp = firstChat.timestamp;
 
-            fetchOlderChats(firstTimestamp);
-          }
-        }
-      },
-      { rootMargin: "20px" }
-    );
-    useEffect(() => {
-      if (firstChatRef.current) {
-        observer.observe(firstChatRef.current);
-      }
+  //           fetchOlderChats(firstTimestamp);
+  //         }
+  //       }
+  //     },
+  //     { rootMargin: "20px" }
+  //   );
+  //   useEffect(() => {
+  //     if (firstChatRef.current) {
+  //       observer.observe(firstChatRef.current);
+  //     }
 
-      return () => {
-        if (firstChatRef.current) {
-          observer.unobserve(firstChatRef.current);
-        }
-      };
-    }, [firstChatRef]);
-  }
+  //     return () => {
+  //       if (firstChatRef.current) {
+  //         observer.unobserve(firstChatRef.current);
+  //       }
+  //     };
+  //   }, [firstChatRef]);
+  // }
   const fetchOlderChats = async (timestamp: string) => {
     const { data, error } = await supabase
       .from("chats")
       .select("chat,timestamp")
       .lt("timestamp", timestamp)
       .order("timestamp", { ascending: true })
+      .eq("channel", params.id)
       .range(0, 10); // Load the next 10 older chats
 
     if (data) {
       setChat((chat) => {
+        console.log(data);
         return [...(data as ChatLoadData[]), ...(chat as ChatLoadData[])];
       });
     }
@@ -208,37 +227,44 @@ export default function RealtimeChats({
               className=" flex flex-col justify-evenly "
               // style={{ height: "60vh" }}
             >
-              {(chat as unknown as ChatLoadData[])?.map((message, index) => (
+              {(chat || []).map((message, index) => (
                 <div
-                  key={message.pkey}
+                  key={message?.pkey}
                   ref={index === 0 ? firstChatRef : null}
-                  className=""
-                  // style={{
-                  //   width: "100%",
-                  //   overflow: "hidden",
-                  // }}
                 >
-                  <p className="" style={{ overflowWrap: "anywhere" }}>
-                    {regex.test(message.chat.chat) ? (
-                      <Image
-                        src={message.chat.chat}
-                        width={500}
-                        height={500}
-                        alt="Picture of the author"
-                      />
-                    ) : (
-                      message.chat.chat
-                    )}
-                  </p>
-                  <p suppressHydrationWarning>
-                    {message.chat.from === params.username
-                      ? `From: You, Time: ${formatTimestamp(
-                          message.timestamp
-                        )} `
-                      : `From: ${message.chat.from}, Time: ${formatTimestamp(
-                          message.timestamp
-                        )}`}
-                  </p>
+                  {
+                    message && message.chat ? ( // Check if message and message.chat are not null
+                      <>
+                        <p className="" style={{ overflowWrap: "anywhere" }}>
+                          {message.chat.isMarkdown ? (
+                            <div className="whitespace-pre-wrap">
+                              <ReactMarkdown>
+                                {sanitizeHtml(message.chat.chat)}
+                              </ReactMarkdown>
+                            </div>
+                          ) : regex.test(message.chat.chat) ? (
+                            <Image
+                              src={message.chat.chat}
+                              width={500}
+                              height={500}
+                              alt="Picture of the author"
+                            />
+                          ) : (
+                            message.chat.chat
+                          )}
+                        </p>
+                        <p>
+                          {message.chat.from === params.username
+                            ? `From: You, Time: ${formatTimestamp(
+                                message.timestamp
+                              )} `
+                            : `From: ${
+                                message.chat.from
+                              }, Time: ${formatTimestamp(message.timestamp)}`}
+                        </p>
+                      </>
+                    ) : null // Render nothing if message or message.chat is null
+                  }
                 </div>
               ))}
             </div>
@@ -252,7 +278,12 @@ export default function RealtimeChats({
                 onChange={(e) => setnewChat(e.target.value)}
                 className="mb-2"
               />
-
+              <Checkbox
+                onClick={() => {
+                  setIsMarkdown(!isMarkdown);
+                }}
+              />
+              is Markdown?
               <div className="py-2">
                 <Button
                   onClick={() => {
@@ -310,15 +341,20 @@ export default function RealtimeChats({
               </ul>
             </div>
             {params.isAdmin && (
-              <Button
-                onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
-                className="mr-2"
-              >
-                Invite
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    onClick={() => setIsUserSelectorOpen(!isUserSelectorOpen)}
+                    className="mr-2"
+                  >
+                    Invite Link
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <p>{`https://miss-cord-crux.vercel.app/dms/join/${params.id}`}</p>
+                </DialogContent>
+              </Dialog>
             )}
-
-            {isUserSelectorOpen && <p>{`/dms/join/${params.id}`}</p>}
           </div>
         </div>
       </div>

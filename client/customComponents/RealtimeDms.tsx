@@ -55,15 +55,18 @@ export default function RealtimeDms({
       .channel("dms")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "dm_members" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "dm_members",
+          filter: `member=eq.${props.email}`,
+        },
         (payload) => {
           setDms((dms) => {
             if (payload.new) {
               // return [...dms, payload.new.id];
-              if (payload.new.member === props.email) {
-                // If the "member" column matches the user's email, add the ID to the state.
-                return [...dms, { id: payload.new.id, name: payload.new.name }];
-              }
+              // If the "member" column matches the user's email, add the ID to the state.
+              return [...dms, { id: payload.new.id, name: payload.new.name }];
             }
             return dms;
           });

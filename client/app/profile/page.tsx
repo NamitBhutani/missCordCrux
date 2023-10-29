@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Avatar from "../../customComponents/AvatarSelector";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 export default function Profile() {
+  const router = useRouter();
   const [aboutData, setAboutData] = useState<string>("");
   const [newAbout, setnewAbout] = useState<string>("");
   const supabase = createClientComponentClient<Database>({});
@@ -25,6 +27,12 @@ export default function Profile() {
   };
   useEffect(() => {
     const getData = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.push("/unauthenticated");
+      }
       const {
         data: { user },
       } = await supabase.auth.getUser();

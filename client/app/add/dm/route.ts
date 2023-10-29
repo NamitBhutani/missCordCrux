@@ -56,17 +56,20 @@ export async function POST(request: Request) {
       admin: email,
 
     });
-    const cachedDms = await redis.lrange(`dms:${email}`, 0, -1);
-    if (cachedDms !== dmStrings) {
-      await redis.ltrim(memberDmsKey, -1, -1)
+    const cachedDms = await redis.lrange(memberDmsKey, 0, -1);
+    // console.log(cachedDms)
+    if (cachedDms.length === 0) {
       await redis.rpush(memberDmsKey, ...dmStrings)
       await redis.expire(memberDmsKey, 60)
-    } else {
-      await redis.rpush(memberDmsKey, JSON.stringify({ id: newDMId, name: dmName }))
+    }
+    else {
+      await redis.del(memberDmsKey)
+      await redis.rpush(memberDmsKey, ...dmStrings)
       await redis.expire(memberDmsKey, 60)
     }
+
     if (newDMInsertError) {
-      return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
+      return NextResponse.json({ message: "Try again!", status: 400 }, { status: 400 })
     }
 
     const { error: adminMemberInsertError } = await supabase
@@ -84,15 +87,16 @@ export async function POST(request: Request) {
         .insert({
           id: newDMId,
           member: member,
+          name: dmName,
         });
 
     });
 
-    const { error: chatInsertError } = await supabase.from("chats").insert({
-      channel: newDMId,
-    });
-    if (adminMemberInsertError || chatInsertError) {
-      return NextResponse.json({ message: 'Error adding DM!', status: 400 }, { status: 400 })
+    // const { error: chatInsertError } = await supabase.from("chats").insert({
+    //   channel: newDMId,
+    // });
+    if (adminMemberInsertError) {
+      return NextResponse.json({ message: JSON.stringify(adminMemberInsertError), status: 400 }, { status: 400 })
     }
     // Cache the new DM ID
     await redis.set(`dms:${newDMId}`, "exists");
@@ -100,7 +104,7 @@ export async function POST(request: Request) {
   } catch (error) {
 
     console.error(error);
-    return NextResponse.json({ message: 'error', status: 400 }, { status: 400 })
+    return NextResponse.json({ message: JSON.stringify(error), status: 400 }, { status: 400 })
   }
 
 }
