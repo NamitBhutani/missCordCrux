@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 
 // Define the URL you want to redirect from
-const redirectUrl = "/api/";
+const redirectUrl = "/api/test";
 
 // Define the target URL where you want to redirect
 const targetUrl = "http://viaduct.proxy.rlwy.net:29260";
