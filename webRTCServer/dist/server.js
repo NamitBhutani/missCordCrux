@@ -6,11 +6,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
+const dotenv = require('dotenv');
+dotenv.config();
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
+    path: '/api',
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.CORS_URL,
     }
 });
 const socketIds = {};
@@ -44,6 +47,6 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('user disconnect', socket.id);
     });
 });
-const PORT = 6969;
-server.listen(PORT, () => console.log(`Server running`));
+const port = process.env.PORT;
+server.listen(port, () => console.log(`Server running on ${port}`));
 //# sourceMappingURL=server.js.map

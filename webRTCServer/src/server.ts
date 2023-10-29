@@ -1,12 +1,14 @@
 import express, { Application } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-
+const dotenv = require('dotenv');
+dotenv.config();
 const app: Application = express();
 
 const server = http.createServer(app);
 
 const io: Server = new Server(server, {
+    path: '/api',
     cors: {
         origin: process.env.CORS_URL,
 
@@ -62,5 +64,5 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('user disconnect', socket.id);
     });
 });
-
-server.listen(process.env.PORT as unknown as number, '::', () => console.log(`Server running`));
+const port = process.env.PORT
+server.listen(port, () => console.log(`Server running on ${port}`));
