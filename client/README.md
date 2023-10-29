@@ -1,6 +1,9 @@
-TODO:
-3.Lazy Loading
-4.CSS layouts
-5.BUG IN video call - group video caller doesnt get the streams of other peers, rest all peers get //FIXED
-6.MAKE ONLY DM PARTICIPANTS BE ABLE TO VIDEO CALL
-7.HANDLE VIDEO CALL DISCONNECT
+Envs Used-
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_REDIS_HOST
+NEXT_PUBLIC_REDIS_PORT
+NEXT_PUBLIC_REDIS_PASSWORD
+NEXT_PUBLIC_IO_URL
+NEXT_PUBLIC_REDIRECT_URL
+If you use Docker Compose to spin up the redis container, the current envs would not work, as they are configured for the redis container on Railway.
