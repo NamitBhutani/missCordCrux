@@ -24,7 +24,7 @@ export async function POST(request: Request) {
         .from("dm_members")
         .delete().eq("member", member).eq("id", id)
     if (memberKickError) {
-        return NextResponse.json({ message: 'Error KIK!', status: 400 }, { status: 400 })
+        return NextResponse.json({ message: 'Error in KIKing!', status: 400 }, { status: 400 })
     }
     else {
         return NextResponse.json({ message: 'KIKed!', status: 200 }, { status: 200 })

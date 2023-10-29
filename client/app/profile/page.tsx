@@ -42,6 +42,9 @@ export default function Profile() {
         .select("about")
         .eq("id", user?.id || "")
         .single();
+      if (error) {
+        toast.error("Something went wrong!");
+      }
       if (aboutLoadData) {
         setAboutData(aboutLoadData.about as string);
       }

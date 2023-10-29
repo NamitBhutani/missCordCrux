@@ -4,6 +4,7 @@ import * as SocketIOClient from "socket.io-client";
 import Peer, * as SimplePeer from "simple-peer";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/codelib/database.types";
+import { toast } from "react-hot-toast";
 function Video({ peer: peer }: { peer: SimplePeer.Instance }) {
   const ref = useRef<HTMLVideoElement | null>(null);
 
@@ -128,7 +129,7 @@ export default function Room({ params }: { params: { id: string } }) {
             });
           });
       } else if (!isUserInDataRef.current) {
-        console.log("not in data" + isUserInDataRef.current);
+        toast.error("You are not a member of this room!");
       }
     };
     fetchMembersAndSetupConnection();

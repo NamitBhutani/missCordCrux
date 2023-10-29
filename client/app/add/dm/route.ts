@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         }
       })
       .catch((error) => {
-        console.error('Error:', error);
+        return NextResponse.json({ message: 'Something went wrong!', status: 400 }, { status: 400 })
       });
     const updatedDms = [...currentDms as RearrangedItem[], { id: newDMId, name: dmName }]
     const dmStrings: string[] = updatedDms.map((dm) => JSON.stringify(dm));
@@ -89,14 +89,16 @@ export async function POST(request: Request) {
           member: member,
           name: dmName,
         });
-
+      if (memberInsertError) {
+        return NextResponse.json({ message: "Something went wrong!", status: 400 }, { status: 400 })
+      }
     });
 
     // const { error: chatInsertError } = await supabase.from("chats").insert({
     //   channel: newDMId,
     // });
     if (adminMemberInsertError) {
-      return NextResponse.json({ message: JSON.stringify(adminMemberInsertError), status: 400 }, { status: 400 })
+      return NextResponse.json({ message: "Something went wrong!", status: 400 }, { status: 400 })
     }
     // Cache the new DM ID
     await redis.set(`dms:${newDMId}`, "exists");

@@ -207,7 +207,7 @@ export default function RealtimeChats({
 
     if (data) {
       setChat((chat) => {
-        console.log(data);
+        //console.log(data);
         return [...(data as ChatLoadData[]), ...(chat as ChatLoadData[])];
       });
     }

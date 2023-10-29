@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import toast from "react-hot-toast";
 import { DialogClose } from "@radix-ui/react-dialog";
 type OnSelectionChangeType = (selectedUsers: string[]) => void;
 interface UserSelectorProps {
@@ -45,7 +46,7 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
           .neq("email", user?.email);
         setProfileData(data);
       } catch (error) {
-        // setError(error.message);
+        toast.error("Something went wrong!");
       }
     };
 

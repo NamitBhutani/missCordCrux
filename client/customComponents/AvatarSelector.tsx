@@ -25,7 +25,7 @@ export default function Avatar() {
         const { error: uploadErr } = await supabase.storage
           .from("profile-images")
           .upload(`avatar_${data[0].id}.png`, image);
-        if (deleteErr || uploadErr) {
+        if (uploadErr) {
           toast.error("Error uploading image");
         } else {
           toast.success("Image uploaded successfully");
