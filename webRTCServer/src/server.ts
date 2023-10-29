@@ -8,7 +8,7 @@ const app: Application = express();
 const server = http.createServer(app);
 
 const io: Server = new Server(server, {
-    path: '/api',
+    path: '/api/socket.io',
     cors: {
         origin: process.env.CORS_URL,
 
