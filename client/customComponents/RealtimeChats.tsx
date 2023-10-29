@@ -12,7 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { sanitizeHtml } from "@/lib/domPurify";
 import ReactMarkdown from "react-markdown";
 import toast from "react-hot-toast";
-
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 const regex = /^https:\/\/mdfwcmjgyognahhbvewj\.supabase\.co.*\.png$/;
 type Message = {
   from: string;
@@ -340,6 +341,14 @@ export default function RealtimeChats({
                 ))}
               </ul>
             </div>
+
+            <Link
+              href={`/dms/chat/videocall/${params.id}`}
+              className={buttonVariants()}
+            >
+              Group Video Call
+            </Link>
+
             {params.isAdmin && (
               <Dialog>
                 <DialogTrigger asChild>
