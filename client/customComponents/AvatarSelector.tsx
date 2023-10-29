@@ -26,12 +26,12 @@ export default function Avatar() {
           .from("profile-images")
           .upload(`avatar_${data[0].id}.png`, image);
         if (uploadErr) {
-          toast.error("Error uploading image");
+          toast.error("Error uploading");
         } else {
           toast.success("Image uploaded successfully");
         }
       } else {
-        toast.error("Error uploading image");
+        toast.error("Error uploading");
       }
     }
   };
@@ -46,7 +46,7 @@ export default function Avatar() {
         onChange={(e) => setImage(e.target.files?.[0] || null)}
       />
       <Button onClick={handleSubmit}>Submit Image</Button>
-      <p>Limit:5 MB, *.png only</p>
+      <p>Limit:5 MB</p>
     </div>
   );
 }
