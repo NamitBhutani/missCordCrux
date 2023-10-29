@@ -3,7 +3,9 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 const app: Application = express();
+
 const server = http.createServer(app);
+
 const io: Server = new Server(server, {
     cors: {
         origin: process.env.CORS_URL,
@@ -61,5 +63,4 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 6969;
-server.listen(PORT, '::', () => console.log(`Server running`));
+server.listen(process.env.PORT as unknown as number, '::', () => console.log(`Server running`));
