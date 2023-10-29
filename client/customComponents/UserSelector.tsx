@@ -62,7 +62,7 @@ export default function UserSelector({ onSelectionChange }: UserSelectorProps) {
     <div>
       <Dialog>
         <DialogTrigger asChild>
-          <Button>Add Members</Button>
+          <Button>Select Members</Button>
         </DialogTrigger>
         <DialogContent>
           {profileData?.map((user) => (
