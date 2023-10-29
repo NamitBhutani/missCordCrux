@@ -169,32 +169,32 @@ export default function RealtimeChats({
   }, [supabase, setChat]);
 
   //Lazy Loading Code
-  // if (typeof IntersectionObserver !== "undefined") {
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0].isIntersecting) {
-  //         if (chat && chat.length > 0) {
-  //           const firstChat = chat[0];
-  //           const firstTimestamp = firstChat.timestamp;
+  if (typeof IntersectionObserver !== "undefined") {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          if (chat && chat.length > 0) {
+            const firstChat = chat[0];
+            const firstTimestamp = firstChat.timestamp;
 
-  //           fetchOlderChats(firstTimestamp);
-  //         }
-  //       }
-  //     },
-  //     { rootMargin: "20px" }
-  //   );
-  //   useEffect(() => {
-  //     if (firstChatRef.current) {
-  //       observer.observe(firstChatRef.current);
-  //     }
+            fetchOlderChats(firstTimestamp);
+          }
+        }
+      },
+      { rootMargin: "20px" }
+    );
+    useEffect(() => {
+      if (firstChatRef.current) {
+        observer.observe(firstChatRef.current);
+      }
 
-  //     return () => {
-  //       if (firstChatRef.current) {
-  //         observer.unobserve(firstChatRef.current);
-  //       }
-  //     };
-  //   }, [firstChatRef]);
-  // }
+      return () => {
+        if (firstChatRef.current) {
+          observer.unobserve(firstChatRef.current);
+        }
+      };
+    }, [firstChatRef]);
+  }
   const fetchOlderChats = async (timestamp: string) => {
     const { data, error } = await supabase
       .from("chats")
