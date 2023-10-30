@@ -3,7 +3,7 @@ Misscord (Video Chat Platform)
 - Made using Next.js for frontend and the backend.
 - Supabase - For OAuth and Database
 - Redis- For caching chats and dm rooms
-- Socket.io and WebRTC(simple-peer) - For real time chat
+- Socket.io and WebRTC(simple-peer) - For real time video chat
 - Tailwind - for Styling
 - ShadCN UI- UI components
 - Vercel - For hosting the frontend
