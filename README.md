@@ -10,10 +10,12 @@ Misscord (Video Chat Platform)
 - Render - For hosting the signalling (websockets) server
 - Railway - For hosting the Redis DB
 - Docker - For containerizing the signalling server and redis.
+  INFO-
+  Free instance types will spin down with inactivity - The webrtc server will spin down, to wake it up, visit https://webrtc-y1s8.onrender.com, if you get the response - Cannot GET / , it should work fine then!
 
 Known BUGS -
 
-- When a new member joins a group call, the stream isn't rendered for other members, but the new member can see the streams of other members.
+- When a new member joins a group call, the stream isn't rendered for other members, but the new member can see the streams of other members. This is not consistent, sometimes it does render.
   (I feel this is due to how Next.js handles the rendering of components, and I'm working on a fix for this)
 
 Things I can improve -
